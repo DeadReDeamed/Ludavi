@@ -7,20 +7,17 @@ using System.Threading.Tasks;
 
 namespace Server
 {
-    class ServerLogic
+    public class ServerLogic
     {
         private static Dictionary<string, ServerClient> clients;
-        private static TcpListener tcpListener; 
+        private static TcpListener tcpListener;
 
-        public static void Main(string[] args)
-        {
-            RunServer();
-        }
+        
 
         public static void RunServer()
         {
             clients = new Dictionary<string, ServerClient>();
-            tcpListener = new TcpListener(System.Net.IPAddress.Any, 60000);
+            tcpListener = new TcpListener(System.Net.IPAddress.Any, 80);
             tcpListener.Start();
             tcpListener.BeginAcceptTcpClient(new AsyncCallback(connectClientsToServer), null);
 
