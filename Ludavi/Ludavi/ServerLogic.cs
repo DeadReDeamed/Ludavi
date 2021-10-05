@@ -11,13 +11,13 @@ namespace Server
     class ServerLogic
     {
         private static Dictionary<uint, ServerClient> clients;
-        private static TcpListener tcpListener; 
+        private static TcpListener tcpListener;
 
         //public static void main(string[] args)
         //{
         //    runserver();
         //}
-
+        private delegate void Tasks(string[] data);
         public static void RunServer()
         {
             clients = new Dictionary<uint, ServerClient>();
@@ -46,6 +46,12 @@ namespace Server
                 await TCPHandler.TCPHandler.SendMessage(randomId, "", TCPHandler.TCPHandler.MessageTypes.LOGIN, $"Logged in, your id is: {randomId}", clients[randomId].Stream);
             }
             tcpListener.BeginAcceptTcpClient(new AsyncCallback(connectClientsToServer), null);
+        }
+
+        public static async void SendMessageToID(string[] data)
+        {
+            var receiverClient = clients[uint.Parse(data[((int)TCPHandler.TCPHandler.StringIndex.RECEIVER)])];
+            await TCPHandler.TCPHandler.SendMessage(uint.Parse(data[((int)TCPHandler.TCPHandler.StringIndex.ID)]), receiverClient.ID.ToString(), TCPHandler.TCPHandler.MessageTypes.CHAT, data[((int)TCPHandler.TCPHandler.StringIndex.MESSAGE)], receiverClient.Stream);
         }
 
         
