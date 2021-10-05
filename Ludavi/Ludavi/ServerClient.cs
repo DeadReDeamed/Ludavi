@@ -22,6 +22,7 @@ namespace Server
             this.Password = Password;
             this.client = client;
             this.Stream = client.GetStream();
+            
         }
     }
 }

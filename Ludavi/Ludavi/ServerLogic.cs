@@ -30,7 +30,7 @@ namespace Server
         {
             var tcpClient = tcpListener.EndAcceptTcpClient(ar);
             Console.WriteLine($"Added: {tcpClient.Client.RemoteEndPoint} to server");
-            string[] dataString = readData(tcpClient.GetStream());
+            string[] dataString = TCPHandler.ReadMessage();
             clients.Add(dataString[0], new ServerClient(tcpClient.Client.RemoteEndPoint.ToString(), dataString[0], dataString[1], tcpClient));
             tcpListener.BeginAcceptTcpClient(new AsyncCallback(connectClientsToServer), null);
         }

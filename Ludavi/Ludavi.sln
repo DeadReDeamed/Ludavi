@@ -10,6 +10,7 @@ EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		TCPHandler\TCPHandler.projitems*{23963d95-a5dc-4c5c-a80c-efded780f97a}*SharedItemsImports = 13
+		TCPHandler\TCPHandler.projitems*{3eb9495f-15ad-4c4e-8fc5-e5317c497057}*SharedItemsImports = 5
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Net.Sockets
+using System.Threading.Tasks;
 
 namespace TCPHandler
 {
@@ -11,13 +12,14 @@ namespace TCPHandler
         {
             string dataString = $"{username} {password} {receiver} {type.ToString()} {message}";
             byte[] length = BitConverter.GetBytes(dataString.Length);
-            byte[] dataBytes = length + Encoding.ASCII.GetBytes(dataString);
+            byte[] dataBytes = length;
+            Encoding.ASCII.GetBytes(dataString).CopyTo(dataBytes, 4);
             stream.Write(dataBytes, 0, dataBytes.Length);
             stream.Flush();
-            return 
+            
         }
 
-        public static string[] ReadMessage() 
+        public static async Task<string[]> ReadMessage(NetworkStream stream) 
         { 
             byte[] buffer = new byte[4];
             stream.Read(buffer, 0, buffer.Length);
