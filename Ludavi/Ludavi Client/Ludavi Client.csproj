@@ -7,11 +7,6 @@
     <UseWPF>true</UseWPF>
   </PropertyGroup>
 
-  <ItemGroup>
-    <Folder Include="Models\" />
-    <Folder Include="ViewModels\" />
-  </ItemGroup>
-
   <Import Project="..\TCPHandler\TCPHandler.projitems" Label="Shared" />
 
 </Project>
