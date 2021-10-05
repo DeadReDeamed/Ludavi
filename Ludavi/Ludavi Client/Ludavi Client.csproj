@@ -12,4 +12,6 @@
     <Folder Include="ViewModels\" />
   </ItemGroup>
 
+  <Import Project="..\TCPHandler\TCPHandler.projitems" Label="Shared" />
+
 </Project>

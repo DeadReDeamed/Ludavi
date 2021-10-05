@@ -9,19 +9,19 @@ namespace Server
 {
     public class ServerClient
     {
-        public string IP { get; private set; }
         public string UserName { get; private set; }
         public string Password { get; private set; }
+        public uint ID { get; set; }
         public NetworkStream Stream { get; private set; }
         public TcpClient client { get; private set; }
 
-        public ServerClient(string IP, string UserName, string Password, TcpClient client)
+        public ServerClient(uint ID, string UserName, string Password, TcpClient client)
         {
-            this.IP = IP;
             this.UserName = UserName;
             this.Password = Password;
             this.client = client;
             this.Stream = client.GetStream();
+            this.ID = ID;
             
         }
     }

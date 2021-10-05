@@ -1,22 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using System.Net.Sockets
+using System.Net.Sockets;
 using System.Threading.Tasks;
 
 namespace TCPHandler
 {
     public class TCPHandler
     {
-        public async Task SendMessage(string username, string password, string receiver, MessageTypes type, string message, NetworkStream stream)
+        public static async Task SendMessage(uint id, string receiver, MessageTypes type, string message, NetworkStream stream)
         {
-            string dataString = $"{username} {password} {receiver} {type.ToString()} {message}";
+            string dataString = $"{id} {receiver} {type.ToString()} {message}";
             byte[] length = BitConverter.GetBytes(dataString.Length);
-            byte[] dataBytes = length;
+            byte[] stringBytes = Encoding.ASCII.GetBytes(dataString);
+            byte[] dataBytes = new byte[length.Length + stringBytes.Length];
             Encoding.ASCII.GetBytes(dataString).CopyTo(dataBytes, 4);
-            stream.Write(dataBytes, 0, dataBytes.Length);
+            length.CopyTo(dataBytes, 0);
+            stream.Write(dataBytes);
             stream.Flush();
-            
         }
 
         public static async Task<string[]> ReadMessage(NetworkStream stream) 
@@ -24,10 +25,17 @@ namespace TCPHandler
             byte[] buffer = new byte[4];
             stream.Read(buffer, 0, buffer.Length);
             int length = BitConverter.ToInt32(buffer);
+            buffer = new byte[length];
             stream.Read(buffer, 0, length);
             string dataString = Encoding.ASCII.GetString(buffer);
             string[] dataStringArray = dataString.Split(" ");
+            string message = "";
+            for(int i = ((int)StringIndex.MESSAGE); i < dataStringArray.Length; i++)
+            {
+                message += dataStringArray[i] + " ";
+            }
 
+            dataStringArray = new string[] {dataStringArray[0], dataStringArray[1], dataStringArray[2], message };
             return dataStringArray;
         }
 
@@ -36,7 +44,16 @@ namespace TCPHandler
             CHAT,
             VOICE,
             DATA,
-            STATUS
+            STATUS,
+            LOGIN
+        }
+
+        public enum StringIndex
+        {
+            ID = 0,
+            RECEIVER = 1,
+            TYPE = 2,
+            MESSAGE = 3
         }
     }
 }

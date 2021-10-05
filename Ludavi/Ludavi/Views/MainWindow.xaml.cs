@@ -25,7 +25,7 @@ namespace Ludavi
         {
             InitializeComponent();
 
-            var outputter = new TextBoxOutputter(TestBox);
+            var outputter = new ConsoleLogTextBoxOutputter(ConsoleLogTextBox);
             Console.SetOut(outputter);
             
         }
