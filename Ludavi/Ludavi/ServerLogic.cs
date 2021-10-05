@@ -35,16 +35,6 @@ namespace Server
             tcpListener.BeginAcceptTcpClient(new AsyncCallback(connectClientsToServer), null);
         }
 
-        public static string[] readData(NetworkStream stream)
-        {
-            byte[] buffer = new byte[4];
-            stream.Read(buffer, 0, buffer.Length);
-            int length = BitConverter.ToInt32(buffer);
-            stream.Read(buffer, 0, length);
-            string dataString = Encoding.ASCII.GetString(buffer);
-            string[] dataStringArray = dataString.Split(" ");
-
-            return dataStringArray;
-        }
+        
     }
 }
