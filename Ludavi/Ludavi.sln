@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31702.278
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ludavi", "Ludavi\Ludavi.csproj", "{3EB9495F-15AD-4C4E-8FC5-E5317C497057}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ludavi Server", "Ludavi\Ludavi Server.csproj", "{3EB9495F-15AD-4C4E-8FC5-E5317C497057}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ludavi Client", "Ludavi Client\Ludavi Client.csproj", "{498E1F2E-251A-453C-8214-679E89B0C798}"
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
@@ -18,6 +20,10 @@ Global
 		{3EB9495F-15AD-4C4E-8FC5-E5317C497057}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3EB9495F-15AD-4C4E-8FC5-E5317C497057}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3EB9495F-15AD-4C4E-8FC5-E5317C497057}.Release|Any CPU.Build.0 = Release|Any CPU
+		{498E1F2E-251A-453C-8214-679E89B0C798}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{498E1F2E-251A-453C-8214-679E89B0C798}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{498E1F2E-251A-453C-8214-679E89B0C798}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{498E1F2E-251A-453C-8214-679E89B0C798}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
