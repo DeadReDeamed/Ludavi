@@ -11,9 +11,9 @@ namespace Ludavi_Client.Models
 
         public string Name { get; set; }
         public string Topic { get; set; }
-        public string Type { get; set; }
+        public int Type { get; set; }
 
-        public Room(string name, string topic, string type)
+        public Room(string name, string topic, int type)
         {
             this.Name = name;
             this.Topic = topic;

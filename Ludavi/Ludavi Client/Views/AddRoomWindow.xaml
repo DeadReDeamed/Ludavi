@@ -5,12 +5,15 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Ludavi_Client.Views"
         xmlns:viewModels="clr-namespace:Ludavi_Client.ViewModels"
+        xmlns:models="clr-namespace:Ludavi_Client.Models"
+        xmlns:markupHelper="clr-namespace:Ludavi_Client.MarkupHelper"
         mc:Ignorable="d"
-        Title="AddRoomWindow" Height="450" Width="400">
+        Title="{Binding windowTitle}" Height="450" Width="400">
 
     <Window.DataContext>
         <viewModels:AddRoomViewModel/>
     </Window.DataContext>
+
 
     <Grid>
 
@@ -35,15 +38,13 @@
         </Grid.ColumnDefinitions>
 
         <Label Grid.Row="0" Grid.Column="0" Content="Name:" FontSize="26" VerticalAlignment="Center"></Label>
-        <TextBox Grid.Row="0" Grid.Column="1" FontSize="26" Margin="10,10,10,10"></TextBox>
+            <TextBox Grid.Row="0" Grid.Column="1" BorderBrush="{Binding NameBorderColor,UpdateSourceTrigger=PropertyChanged}" Text="{Binding RoomName}" FontSize="26" Margin="10,10,10,10"></TextBox>
 
         <Label Grid.Row="1" Grid.Column="0" Content="Topic:"  FontSize="26" VerticalAlignment="Center"></Label>
-        <TextBox Grid.Row="1" Grid.Column="1" FontSize="26" Grid.RowSpan="2" Margin="10,10,10,10"></TextBox>
+            <TextBox Grid.Row="1" Grid.Column="1" BorderBrush="{Binding TopicBorderColor,UpdateSourceTrigger=PropertyChanged}" Text="{Binding RoomTopic}" FontSize="26" Grid.RowSpan="2" Margin="10,10,10,10"></TextBox>
 
         <Label Grid.Row="3" Grid.Column="0" Content="Type:"  FontSize="26" VerticalAlignment="Center"></Label>
-        <ComboBox Grid.Row="3" Grid.Column="1" FontSize="26" Margin="10,10,10,10" SelectedIndex="0">
-            <ComboBoxItem Content="Text room"></ComboBoxItem>
-            <ComboBoxItem Content="Voice room"></ComboBoxItem>
+            <ComboBox Grid.Row="3" Grid.Column="1" FontSize="26" ItemsSource="{markupHelper:EnumBindingSource models:RoomType}" Margin="10,10,10,10" SelectedIndex="{Binding RoomType}">
         </ComboBox>
 
         </Grid>

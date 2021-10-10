@@ -14,14 +14,22 @@ namespace Ludavi_Client.ViewModels
         public string RoomName => "roomName";
         public string RoomTopic => "roomTopic, but i'm writing a bit more to fill this box ;)";
 
-        private ICommand openDialogCommand = null;
-        public ICommand OpenDialogCommand
+
+        public MainWindowViewModel()
         {
-            get { return this.openDialogCommand; }
-            set { this.openDialogCommand = value; }
+            this.openRoomDialogCommand = new RelayCommand(OnOpenRoomDialog);
         }
 
-        public static Room OpenDialog()
+
+        private ICommand openRoomDialogCommand = null;
+        public ICommand OpenRoomDialogCommand
+        {
+            get { return this.openRoomDialogCommand; }
+            set { this.openRoomDialogCommand = value; }
+        }
+
+
+        public static Room OpenRoomDialog()
         {
             AddRoomWindow roomDialog = new AddRoomWindow();
             roomDialog.ShowDialog();
@@ -31,17 +39,14 @@ namespace Ludavi_Client.ViewModels
         }
 
 
-        private void OnOpenDialog(object parameter)
+        private void OnOpenRoomDialog(object parameter)
         {
 
-            Room room = OpenDialog();
+            Room room = OpenRoomDialog();
             Console.WriteLine(room);
         }
 
-        public MainWindowViewModel()
-        {
-            this.openDialogCommand = new RelayCommand(OnOpenDialog);
-        }
+       
 
 
 

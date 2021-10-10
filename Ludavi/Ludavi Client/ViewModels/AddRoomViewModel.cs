@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -10,12 +12,44 @@ using Ludavi_Client.Views;
 
 namespace Ludavi_Client.ViewModels
 {
-    public class AddRoomViewModel
+    public class AddRoomViewModel : INotifyPropertyChanged
     {
+
+        public string windowTitle => "add a room";
+
+
         public Room RoomResult
         {
             get;
             private set;
+        }
+
+        public string RoomName { get; set; }
+        public string RoomTopic { get; set; }
+        public int RoomType { get; set; }
+
+        
+
+        private string nameBorderColor;
+        public string NameBorderColor
+        {
+            get { return nameBorderColor; }
+            set
+            {
+                nameBorderColor = value;
+                OnPropertyChanged("NameBorderColor");
+            }
+        }
+
+        private string topicBorderColor;
+        public string TopicBorderColor
+        {
+            get { return topicBorderColor; }
+            set
+            {
+                topicBorderColor = value;
+                OnPropertyChanged("TopicBorderColor");
+            }
         }
 
 
@@ -39,6 +73,10 @@ namespace Ludavi_Client.ViewModels
            
             this.createRoomCommand = new RelayCommand(ConfirmClicked);
             this.cancelCommand = new RelayCommand(CancelClicked);
+
+        this.NameBorderColor = "Black";
+        this.TopicBorderColor = "Black";
+
         }
 
         public void CloseDialogWithResult(Window dialog, Room result)
@@ -50,9 +88,33 @@ namespace Ludavi_Client.ViewModels
 
         private void ConfirmClicked(object parameter)
         {
-            //TODO add some format checks here
-            Room room = new Room("these", "can be taken from a xaml element", "Voice");
-            this.CloseDialogWithResult(parameter as Window, room);
+            
+            if (CheckForValidRoomValues(RoomName, RoomTopic, RoomType))
+            {
+                Room room = new Room(RoomName, RoomTopic, RoomType);
+                this.CloseDialogWithResult(parameter as Window, room);
+            }
+            
+        }
+
+        private bool CheckForValidRoomValues(string roomName, string roomTopic, int roomType)
+        {
+            bool illegalFormat = false;
+            if (String.IsNullOrEmpty(roomName))
+            {
+                this.NameBorderColor = "Red";
+                illegalFormat = true;
+            }
+            else this.NameBorderColor = "Black";
+
+            if (String.IsNullOrEmpty(roomTopic))
+            {
+                this.TopicBorderColor = "Red";
+                illegalFormat = true;
+            }
+            else this.TopicBorderColor = "Black";
+
+            return !illegalFormat;
         }
 
         private void CancelClicked(object parameter)
@@ -62,7 +124,11 @@ namespace Ludavi_Client.ViewModels
             dialog.DialogResult = false;
         }
 
-        
 
+        public event PropertyChangedEventHandler PropertyChanged;
+        public void OnPropertyChanged(string property)
+        {
+            this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(property));
+        }
     }
 }

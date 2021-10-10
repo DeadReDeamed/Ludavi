@@ -32,8 +32,8 @@
 
         <Grid Grid.Column="0" Grid.Row="1">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="auto"></ColumnDefinition>
-                <ColumnDefinition Width="auto"></ColumnDefinition>
+                <ColumnDefinition Width="auto" MinWidth="100"></ColumnDefinition>
+                <ColumnDefinition Width="auto" MinWidth="20"></ColumnDefinition>
             </Grid.ColumnDefinitions>
 
             <ListBox Grid.Column="0" Name="roomList"/>
@@ -44,7 +44,7 @@
 
 
 
-        <Button Grid.Column="0" Grid.Row="2" VerticalAlignment="Bottom" Command="{Binding OpenDialogCommand}" Content="add a room" >
+        <Button Grid.Column="0" Grid.Row="2" VerticalAlignment="Bottom" Command="{Binding OpenRoomDialogCommand}" Content="add a room" >
         </Button>
 
 
