@@ -3,8 +3,10 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:ie="http://schemas.microsoft.com/xaml/behaviors"
         xmlns:local="clr-namespace:Ludavi_Client"
         xmlns:viewModels="clr-namespace:Ludavi_Client.ViewModels"
+        xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
         mc:Ignorable="d"
         Title="Ludavi" Height="450" Width="800">
 
@@ -32,12 +34,17 @@
 
         <Grid Grid.Column="0" Grid.Row="1">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="auto" MinWidth="100"></ColumnDefinition>
-                <ColumnDefinition Width="auto" MinWidth="20"></ColumnDefinition>
+                <ColumnDefinition Width="auto" MinWidth="120"></ColumnDefinition>
             </Grid.ColumnDefinitions>
 
-            <ListBox Grid.Column="0" Name="roomList"/>
-            <ListBox Grid.Column="1" Name="roomIconList"></ListBox>
+            <ListBox Grid.Column="0" Name="roomList" ItemsSource="{Binding RoomsCollection,UpdateSourceTrigger=PropertyChanged}">
+                <ie:Interaction.Triggers>
+                    <ie:EventTrigger EventName="SelectionChanged">
+                        <ie:InvokeCommandAction Command="{Binding SelectedItemChangedCommand}"  CommandParameter="{Binding ElementName=roomList, Path=SelectedItem}"/>
+                    </ie:EventTrigger>
+                </ie:Interaction.Triggers>
+            </ListBox>
+            
             
 
         </Grid>
@@ -54,8 +61,8 @@
                 <ColumnDefinition Width="*"></ColumnDefinition>
             </Grid.ColumnDefinitions>
 
-            <Label Grid.Column="0" FontWeight="Bold" FontSize="16" VerticalAlignment="Bottom" Content="{Binding RoomName}"></Label>
-            <Label Grid.Column="1" VerticalAlignment="Bottom" Content="{Binding RoomTopic}"></Label>
+            <Label Grid.Column="0" FontWeight="Bold" FontSize="16" VerticalAlignment="Bottom" Content="{Binding RoomName,UpdateSourceTrigger=PropertyChanged}"></Label>
+            <Label Grid.Column="1" VerticalAlignment="Bottom" Content="{Binding RoomTopic,UpdateSourceTrigger=PropertyChanged}"></Label>
         </Grid>
 
         <Grid Grid.Row="3" Grid.Column="1" >

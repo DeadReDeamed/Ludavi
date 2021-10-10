@@ -20,5 +20,10 @@ namespace Ludavi_Client.Models
             this.Type = type;
         }
 
+        public override string ToString()
+        {
+            return $"{Name} ({(Models.RoomType)Type})";
+        }
+
     }
 }
