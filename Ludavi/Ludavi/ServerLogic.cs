@@ -4,7 +4,7 @@ using System.Linq;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
-using TCPHandler;
+using TCPHandlerNameSpace;
 
 namespace Server
 {
@@ -12,6 +12,7 @@ namespace Server
     {
         private static Dictionary<uint, ServerClient> clients;
         private static TcpListener tcpListener;
+        private static TCPHandler tcpHandler;
 
         //public static void main(string[] args)
         //{
@@ -30,20 +31,21 @@ namespace Server
         public static async void connectClientsToServer(IAsyncResult ar)
         {
             var tcpClient = tcpListener.EndAcceptTcpClient(ar);
+            tcpHandler = new TCPHandler(tcpClient.GetStream());
             Console.WriteLine($"Added: {tcpClient.Client.RemoteEndPoint} to server");
-            string[] dataString = await TCPHandler.TCPHandler.ReadMessage(tcpClient.GetStream());
+            string[] dataString = await tcpHandler.ReadMessage();
 
-            if (dataString[((int)TCPHandler.TCPHandler.StringIndex.ID)] == "0") {
+            if (dataString[((int)TCPHandler.StringIndex.ID)] == "0") {
                 uint randomId = (uint)(new Random().Next(1, int.MaxValue));
                 while (clients.ContainsKey(randomId))
                 {
                     randomId = (uint)(new Random().Next(1, int.MaxValue));
                 }
 
-                string[] usernameAndPassword = dataString[((int)TCPHandler.TCPHandler.StringIndex.MESSAGE)].Split(" ");
+                string[] usernameAndPassword = dataString[((int)TCPHandler.StringIndex.MESSAGE)].Split(" ");
                 clients.Add(randomId, new ServerClient(randomId, usernameAndPassword[0], usernameAndPassword[1], tcpClient));
-                Console.WriteLine(dataString[((int)TCPHandler.TCPHandler.StringIndex.MESSAGE)]);
-                await TCPHandler.TCPHandler.SendMessage(randomId, "", TCPHandler.TCPHandler.MessageTypes.LOGIN, $"Logged in, your id is: {randomId}", clients[randomId].Stream);
+                Console.WriteLine(dataString[((int)TCPHandler.StringIndex.MESSAGE)]);
+                await TCPHandler.SendMessage(randomId, "", TCPHandler.MessageTypes.LOGIN, $"Logged in, your id is: {randomId}", clients[randomId].Stream);
             }
             tcpListener.BeginAcceptTcpClient(new AsyncCallback(connectClientsToServer), null);
         }
