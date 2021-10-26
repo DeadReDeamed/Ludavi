@@ -20,6 +20,8 @@ namespace Ludavi_Client.ViewModels
             functions = new Dictionary<TCPHandler.MessageTypes, Action<string[]>>();
             functions.Add(TCPHandler.MessageTypes.CHAT, handleChatData);
             functions.Add(TCPHandler.MessageTypes.ROOM, handleRoomData);
+            this.handler = tcphandler;
+            Connected = true;
 
             new Thread(() => {
                 while (Connected)

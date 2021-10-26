@@ -123,7 +123,7 @@ namespace Ludavi_Client.ViewModels
             roomDialog.ShowDialog();
             AddRoomViewModel roomDialogContext = (AddRoomViewModel)(roomDialog.DataContext);
             Room result = roomDialogContext.RoomResult;
-            tcpHandler.SendMessage(ID, "", TCPHandler.MessageTypes.ROOM, JsonConvert.SerializeObject(result));
+            tcpHandler.SendMessage(ID, "", TCPHandler.MessageTypes.ROOM, "ADDROOM " + JsonConvert.SerializeObject(result));
             return result;
         }
 

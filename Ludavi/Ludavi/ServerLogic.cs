@@ -74,13 +74,15 @@ namespace Server
         public static async void HandleRoomManagement(string[] data)
         {
             Console.WriteLine(data[(int)TCPHandler.StringIndex.MESSAGE]);
-            switch (data[(int)TCPHandler.StringIndex.MESSAGE])
+            string message = data[(int)TCPHandler.StringIndex.MESSAGE];
+            var messageSplit = message.Split(" ", 2);
+            switch (messageSplit[0])
             {
                 case "GETROOMS":
                     await clients[uint.Parse(data[(int)TCPHandler.StringIndex.ID])].handler.SendMessage(uint.Parse(data[(int)TCPHandler.StringIndex.ID]), "", TCPHandler.MessageTypes.ROOM, JsonConvert.SerializeObject(rooms));
                     break;
                 case "ADDROOM":
-                    rooms.Add(JsonConvert.DeserializeObject<Room>(data[(int)TCPHandler.StringIndex.MESSAGE]));
+                    rooms.Add(JsonConvert.DeserializeObject<Room>(messageSplit[1]));
                     string[] stringdata = { "s", "s", ((int)TCPHandler.MessageTypes.ROOM).ToString(), "UPDATEROOMS" };
                     SendMessageToAllUsers(stringdata);
                     break;
