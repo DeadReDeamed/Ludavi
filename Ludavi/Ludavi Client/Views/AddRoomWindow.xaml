@@ -41,7 +41,7 @@
             <TextBox Grid.Row="0" Grid.Column="1" BorderBrush="{Binding NameBorderColor,UpdateSourceTrigger=PropertyChanged}" Text="{Binding RoomName}" FontSize="26" Margin="10,10,10,10"></TextBox>
 
         <Label Grid.Row="1" Grid.Column="0" Content="Topic:"  FontSize="26" VerticalAlignment="Center"></Label>
-            <TextBox Grid.Row="1" Grid.Column="1" BorderBrush="{Binding TopicBorderColor,UpdateSourceTrigger=PropertyChanged}" Text="{Binding RoomTopic}" FontSize="26" Grid.RowSpan="2" Margin="10,10,10,10"></TextBox>
+            <TextBox Grid.Row="1" Grid.Column="1" TextWrapping="Wrap" BorderBrush="{Binding TopicBorderColor,UpdateSourceTrigger=PropertyChanged}" Text="{Binding RoomTopic}" FontSize="26" Grid.RowSpan="2" Margin="10,10,10,10"></TextBox>
 
         <Label Grid.Row="3" Grid.Column="0" Content="Type:"  FontSize="26" VerticalAlignment="Center"></Label>
             <ComboBox Grid.Row="3" Grid.Column="1" FontSize="26" ItemsSource="{markupHelper:EnumBindingSource models:RoomType}" Margin="10,10,10,10" SelectedIndex="{Binding RoomType}">
