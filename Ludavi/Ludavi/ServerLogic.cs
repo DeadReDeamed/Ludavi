@@ -28,7 +28,7 @@ namespace Server
         {
             clients = new Dictionary<uint, ServerClient>();
             functions = new Dictionary<TCPHandler.MessageTypes, Action<string[]>>();
-            functions.Add(TCPHandler.MessageTypes.CHAT, SendMessageToRoom);
+            functions.Add(TCPHandler.MessageTypes.CHAT, SendMessageToAllUsers);
             functions.Add(TCPHandler.MessageTypes.ROOM, HandleRoomManagement);
             tcpListener = new TcpListener(System.Net.IPAddress.Any, 80);
             tcpListener.Start();
@@ -60,7 +60,7 @@ namespace Server
             tcpListener.BeginAcceptTcpClient(new AsyncCallback(connectClientsToServer), null);
         }
 
-        public static async void SendMessageToRoom(string[] data)
+        public static async void SendMessageToAllUsers(string[] data)
         {
             sendToAll<Task> send = tcpHandler.SendMessage;
             send -= tcpHandler.SendMessage;
@@ -80,6 +80,9 @@ namespace Server
                     await clients[uint.Parse(data[(int)TCPHandler.StringIndex.ID])].handler.SendMessage(uint.Parse(data[(int)TCPHandler.StringIndex.ID]), "", TCPHandler.MessageTypes.ROOM, JsonConvert.SerializeObject(rooms));
                     break;
                 case "ADDROOM":
+                    rooms.Add(JsonConvert.DeserializeObject<Room>(data[(int)TCPHandler.StringIndex.MESSAGE]));
+                    string[] stringdata = { "s", "s", ((int)TCPHandler.MessageTypes.ROOM).ToString(), "UPDATEROOMS" };
+                    SendMessageToAllUsers(stringdata);
                     break;
             }
         }

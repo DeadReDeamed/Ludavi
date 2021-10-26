@@ -8,6 +8,7 @@ using System.Windows;
 using System.Windows.Input;
 using Ludavi_Client.Models;
 using Ludavi_Client.Views;
+using Newtonsoft.Json;
 using TCPHandlerNameSpace;
 
 namespace Ludavi_Client.ViewModels
@@ -57,9 +58,9 @@ namespace Ludavi_Client.ViewModels
 
         #endregion
 
-        private TCPHandler tcpHandler;
-        private uint ID;
-        private RoomManager roomManager;
+        private static TCPHandler tcpHandler;
+        public static uint ID { get; private set; }
+        public RoomManager roomManager { get; set; }
         private TcpClient client;
 
         public MainWindowViewModel()
@@ -72,6 +73,8 @@ namespace Ludavi_Client.ViewModels
             roomsCollection = new();
 
             roomManager.rooms.ForEach(room => RoomsCollection.Add(room));
+
+            NetworkManager network = new NetworkManager(tcpHandler, this);
 
             roomName = "Welcome";
             roomTopic = "please select or add a room to start communicating!";
@@ -120,6 +123,7 @@ namespace Ludavi_Client.ViewModels
             roomDialog.ShowDialog();
             AddRoomViewModel roomDialogContext = (AddRoomViewModel)(roomDialog.DataContext);
             Room result = roomDialogContext.RoomResult;
+            tcpHandler.SendMessage(ID, "", TCPHandler.MessageTypes.ROOM, JsonConvert.SerializeObject(result));
             return result;
         }
 
