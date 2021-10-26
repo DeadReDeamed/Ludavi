@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
+using TCPHandlerNameSpace;
 
 namespace Server
 {
@@ -12,17 +14,35 @@ namespace Server
         public string UserName { get; private set; }
         public string Password { get; private set; }
         public uint ID { get; set; }
-        public NetworkStream Stream { get; private set; }
-        public TcpClient client { get; private set; }
-
-        public ServerClient(uint ID, string UserName, string Password, TcpClient client)
+        public TCPHandler handler { get; set; }
+        public TcpClient client { get; set; }
+        public bool connected { get; set; }
+        public ServerClient(uint ID, string UserName, string Password, TcpClient client, TCPHandler handler)
         {
             this.UserName = UserName;
             this.Password = Password;
-            this.client = client;
-            this.Stream = client.GetStream();
+            this.handler = handler;
             this.ID = ID;
-            
+            this.client = client;
+            connected = true;
+            new Thread(() => { startListening(); }).Start();
+        }
+
+        public void startListening()
+        {
+            while (connected)
+            {
+                string[] data = handler.ReadMessage();
+
+                try
+                {
+                    ServerLogic.functions[(TCPHandler.MessageTypes)int.Parse(data[(int)TCPHandler.StringIndex.TYPE])].Invoke(data); 
+                } 
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.StackTrace);
+                }
+            }
         }
     }
 }

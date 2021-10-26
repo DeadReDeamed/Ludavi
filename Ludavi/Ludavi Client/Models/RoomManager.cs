@@ -9,28 +9,44 @@ using TCPHandlerNameSpace;
 
 namespace Ludavi_Client.Models
 {
-    class RoomManager
+    public class RoomManager
     {
-        private uint currentRoom;
-        private List<Room> rooms;
+        public Room currentRoom { get; private set; }
+        public List<Room> rooms { get; private set; }
         private uint userID;
         public RoomManager(TCPHandler handler, uint userID)
         {
             this.userID = userID;
             rooms = new List<Room>();
-           
-            new Thread(async () => {
-                await handler.SendMessage(userID, "server", TCPHandler.MessageTypes.DATA, "REQUEST ROOMS");
-                string[] message = await handler.ReadMessage();
-                string fullMessage = "";
-                for (int i = 0; i < message.Length; i++)
-                {
-                    fullMessage += message[i] + " ";
-                }
-                fullMessage.Trim();
-                rooms = JsonConvert.DeserializeObject<List<Room>>(fullMessage);
-            });
+          
+            handler.SendMessage(userID, "server", TCPHandler.MessageTypes.ROOM, "GETROOMS");
+            string[] message = handler.ReadMessage();
+            string fullMessage = "";
+            for (int i = (int)TCPHandler.StringIndex.MESSAGE; i < message.Length; i++)
+            {
+                fullMessage += message[i] + " ";
+            }
+            fullMessage = fullMessage.Trim();
+            rooms = JsonConvert.DeserializeObject<List<Room>>(fullMessage);
+            
 
+        }
+
+        public void SelectRoom(uint roomNumber)
+        {
+            foreach(Room room in rooms)
+            {
+                if(room.RoomID == roomNumber)
+                {
+                    currentRoom = room;
+                    break;
+                }
+            }
+        }
+
+        public void addRoom(Room room)
+        {
+            rooms.Add(room);
         }
     }
 }

@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Ludavi_Client.Models;
+using Ludavi_Client.ViewModels;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Sockets;
@@ -23,32 +25,20 @@ namespace Ludavi_Client
     /// </summary>
     public partial class MainWindow : Window
     {
-        private TCPHandler tcpHandler;
-        private uint ID;
-
-        public MainWindow(TCPHandler handler)
+        
+        public MainWindow()
         {
             InitializeComponent();
-            new Thread(async () => { await connectToServer(); }).Start();
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            
+            if(this.DataContext != null)
+            {
+                ((MainWindowViewModel)this.DataContext).SendMessageToRoom(messageTextBox.Text);
+                messageTextBox.Text = "";
+            }
         }
-
-        
-
-        public async Task<Task> connectToServer()
-        {
-            TcpClient client = new TcpClient();
-            await client.ConnectAsync("localhost", 80);
-            TCPHandler tcpHandler = new TCPHandler(client.GetStream());
-            await tcpHandler.SendMessage(0, "", TCPHandler.MessageTypes.LOGIN, "Luca Password");
-            string[] message = await tcpHandler.ReadMessage();
-            Console.WriteLine(message[((int)TCPHandler.StringIndex.MESSAGE)]);
-            ID = uint.Parse(message[((int)TCPHandler.StringIndex.ID)]);
-            return Task.CompletedTask;
-        }
+       
     }
 }

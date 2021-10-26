@@ -24,7 +24,7 @@ namespace Ludavi_Client.Models
 
         public override string ToString()
         {
-            return $"{Name} ({(Models.RoomType)Type})";
+            return $"{Name} ({(RoomType)Type})";
         }
 
     }
