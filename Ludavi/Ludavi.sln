@@ -7,8 +7,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ludavi Server", "Ludavi\Lud
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ludavi Client", "Ludavi Client\Ludavi Client.csproj", "{498E1F2E-251A-453C-8214-679E89B0C798}"
 EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "TCPHandlerProject", "TCPHandler\TCPHandlerProject.shproj", "{23963D95-A5DC-4C5C-A80C-EFDED780F97A}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		TCPHandler\TCPHandler.projitems*{23963d95-a5dc-4c5c-a80c-efded780f97a}*SharedItemsImports = 13
 		TCPHandler\TCPHandler.projitems*{3eb9495f-15ad-4c4e-8fc5-e5317c497057}*SharedItemsImports = 5
 		TCPHandler\TCPHandler.projitems*{498e1f2e-251a-453c-8214-679e89b0c798}*SharedItemsImports = 5
 	EndGlobalSection

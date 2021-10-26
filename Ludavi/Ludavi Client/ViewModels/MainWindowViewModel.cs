@@ -58,6 +58,7 @@ namespace Ludavi_Client.ViewModels
         public MainWindowViewModel()
         {
             this.openRoomDialogCommand = new RelayCommand(OnOpenRoomDialog);
+            this.openLoginDialogCommand = new RelayCommand(OnOpenLoginDialog);
             roomsCollection = new();
             roomName = "Welcome";
             roomTopic = "please select or add a room to start communicating!";
@@ -71,11 +72,27 @@ namespace Ludavi_Client.ViewModels
 
         }
 
+        private void OnOpenLoginDialog(object paramater)
+        {
+            loginWindow loginDialog = new loginWindow();
+            loginDialog.ShowDialog();
+        }
+
         public void initRoom(Room room)
         {
             RoomName = room.Name;
             RoomTopic = room.Topic;
         }
+
+
+        private ICommand openLoginDialogCommand = null;
+
+        public ICommand OpenLoginDialogCommand
+        {
+            get { return this.openLoginDialogCommand; }
+            set { this.openLoginDialogCommand = value; }
+        }
+
 
         #region add room dialog, commands and helper methods
 
