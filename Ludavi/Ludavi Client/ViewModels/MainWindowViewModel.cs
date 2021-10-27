@@ -10,6 +10,7 @@ using Ludavi_Client.Models;
 using Ludavi_Client.Views;
 using Newtonsoft.Json;
 using TCPHandlerNameSpace;
+using TCPHandlerNameSpace.Models;
 
 namespace Ludavi_Client.ViewModels
 {
@@ -83,7 +84,8 @@ namespace Ludavi_Client.ViewModels
 
             SelectedItemChangedCommand = new RelayCommand((selectedItem) =>
             {
-                initRoom((Room)selectedItem);
+                if(selectedItem != null)
+                    initRoom((Room)selectedItem);
             });
         }
 

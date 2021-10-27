@@ -9,6 +9,7 @@ using System.Windows;
 using System.Windows.Input;
 using Ludavi_Client.Models;
 using Ludavi_Client.Views;
+using TCPHandlerNameSpace.Models;
 
 namespace Ludavi_Client.ViewModels
 {
@@ -17,7 +18,7 @@ namespace Ludavi_Client.ViewModels
 
         public string windowTitle => "add a room";
 
-
+        
         public Room RoomResult
         {
             get;

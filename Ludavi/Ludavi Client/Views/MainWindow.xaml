@@ -11,70 +11,92 @@
         Initialized="MainWindow_OnInitialized"
         Title="Ludavi" Height="450" Width="800">
 
-    
 
     <Window.DataContext>
         <viewModels:MainWindowViewModel/>
     </Window.DataContext>
 
 
-    <Grid>
+    <Grid Background="#B8B8B8">
 
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="auto"/>
+            <ColumnDefinition Width="5"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
         <Grid.RowDefinitions>
             <RowDefinition Height="30"></RowDefinition>
             <RowDefinition Height="*"></RowDefinition>
-            <RowDefinition Height="20"></RowDefinition>
+            <RowDefinition Height="50"></RowDefinition>
         </Grid.RowDefinitions>
 
-        <Label Grid.Row="0" Grid.Column="0" Content="rooms" FontSize="12"></Label>
+        <GridSplitter Grid.Column="1" Grid.Row="0" Grid.RowSpan="3" Width="2" HorizontalAlignment="Stretch" Background="#6B6B6B" ResizeBehavior="PreviousAndNext"/>
+
+
+        <Label Grid.Row="0" Grid.Column="0" Content="rooms" FontSize="14" FontWeight="Bold" Foreground="GhostWhite" Background="#A9A9A9" FontFamily="Verdana"></Label>
 
         <Grid Grid.Column="0" Grid.Row="1">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="auto" MinWidth="120"></ColumnDefinition>
+                <ColumnDefinition Width="*" MinWidth="120"></ColumnDefinition>
             </Grid.ColumnDefinitions>
 
-            <ListBox Grid.Column="0" Name="roomList" ItemsSource="{Binding RoomsCollection,UpdateSourceTrigger=PropertyChanged}">
+            <ListBox Grid.Column="0" 
+                     Name="roomList"
+                     ItemsSource="{Binding RoomsCollection,UpdateSourceTrigger=PropertyChanged}" 
+                     Background="#EBEBEB">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock HorizontalAlignment="Right" Text="{Binding icon}" Padding="5"/>
+                            <TextBlock Foreground="DimGray" Text="|" Padding="5"/>
+                            <TextBlock  FontSize="14" VerticalAlignment="Center" Text="{Binding Name}"/>
+                        </StackPanel>
+                            
+                        
+                        
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
                 <ie:Interaction.Triggers>
                     <ie:EventTrigger EventName="SelectionChanged">
                         <ie:InvokeCommandAction Command="{Binding SelectedItemChangedCommand}"  CommandParameter="{Binding ElementName=roomList, Path=SelectedItem}"/>
                     </ie:EventTrigger>
                 </ie:Interaction.Triggers>
             </ListBox>
-            
-            
+
+
 
         </Grid>
 
 
 
-        <Button Grid.Column="0" Grid.Row="2" VerticalAlignment="Bottom" Command="{Binding OpenRoomDialogCommand}" Content="add a room" >
+        <Button Grid.Column="0" Grid.Row="2" VerticalAlignment="Center" Command="{Binding OpenRoomDialogCommand}" Content="add a room" 
+                BorderThickness="2" Background="DarkGray" BorderBrush="DarkGray" FontWeight="Bold" FontFamily="Verdana"
+                Foreground="GhostWhite">
         </Button>
 
 
-        <Grid Grid.Row="0" Grid.Column="1" >
+
+        <Grid Grid.Row="0" Grid.Column="2" Background="#A9A9A9" >
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="auto"></ColumnDefinition>
                 <ColumnDefinition Width="*"></ColumnDefinition>
             </Grid.ColumnDefinitions>
 
-            <Label Grid.Column="0" FontWeight="Bold" FontSize="16" VerticalAlignment="Bottom" Content="{Binding RoomName,UpdateSourceTrigger=PropertyChanged}"></Label>
-            <Label Grid.Column="1" VerticalAlignment="Bottom" Content="{Binding RoomTopic,UpdateSourceTrigger=PropertyChanged}"></Label>
+            <Label Grid.Column="0" FontWeight="Bold" FontSize="16" VerticalAlignment="Bottom" Foreground="GhostWhite" Content="{Binding RoomName,UpdateSourceTrigger=PropertyChanged}"></Label>
+            <Label Grid.Column="1" VerticalAlignment="Bottom" Foreground="GhostWhite" Content="{Binding RoomTopic,UpdateSourceTrigger=PropertyChanged}"></Label>
         </Grid>
 
-        <Grid Grid.Row="3" Grid.Column="1" >
+        <Grid Grid.Row="3" Grid.Column="2" Background="#B8B8B8">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"></ColumnDefinition>
                 <ColumnDefinition Width="auto"></ColumnDefinition>
             </Grid.ColumnDefinitions>
-            <TextBox Grid.Column="0" Name="messageTextBox"></TextBox>
-            <Button Grid.Column="1" Click="Button_Click"> -> </Button>
+            <TextBox Grid.Column="0" Name="messageTextBox" Grid.ColumnSpan="1"
+                     Style="{StaticResource messageTextbox}" VerticalAlignment="Center" Height="50"  ></TextBox>
+            <Button Grid.Column="1" Click="Button_Click"  Background="Transparent" FontSize="25" BorderThickness="0" Width="30" VerticalAlignment="Center" HorizontalAlignment="Center" Content="▶" />
         </Grid>
-        
+
     </Grid>
 </Window>
 

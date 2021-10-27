@@ -1,5 +1,4 @@
-﻿using Ludavi_Client.Models;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,6 +6,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 using TCPHandlerNameSpace;
+using TCPHandlerNameSpace.Models;
 
 namespace Server
 {
