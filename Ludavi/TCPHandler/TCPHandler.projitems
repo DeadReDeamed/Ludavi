@@ -9,11 +9,9 @@
     <Import_RootNamespace>TCPHandler</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)Models\Message.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\Room.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\RoomTypesEnum.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TCPHandler.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="$(MSBuildThisFileDirectory)Models\" />
   </ItemGroup>
 </Project>

@@ -12,10 +12,10 @@ namespace Ludavi_Client.ViewModels
     class NetworkManager
     {
         private Dictionary<TCPHandler.MessageTypes, Action<string[]>> functions;
-        private TCPHandler handler;
+        private TCPHandlerNameSpace.TCPHandler handler;
         public bool Connected { get; set; }
         public MainWindowViewModel MainWindowViewModel;
-        public NetworkManager(TCPHandler tcphandler, MainWindowViewModel mainWindowViewModel)
+        public NetworkManager(TCPHandlerNameSpace.TCPHandler tcphandler, MainWindowViewModel mainWindowViewModel)
         {
             this.MainWindowViewModel = mainWindowViewModel;
             functions = new Dictionary<TCPHandler.MessageTypes, Action<string[]>>();

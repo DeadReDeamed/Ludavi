@@ -26,12 +26,42 @@
         </Grid.ColumnDefinitions>
 
         <Grid.RowDefinitions>
-            <RowDefinition Height="30"></RowDefinition>
-            <RowDefinition Height="*"></RowDefinition>
-            <RowDefinition Height="50"></RowDefinition>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="50"/>
         </Grid.RowDefinitions>
 
         <GridSplitter Grid.Column="1" Grid.Row="0" Grid.RowSpan="3" Width="2" HorizontalAlignment="Stretch" Background="#6B6B6B" ResizeBehavior="PreviousAndNext"/>
+
+        <ListBox Grid.Column="2" Grid.Row="1" ItemsSource="{Binding Messages}" Background="#B8B8B8" >
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <StackPanel Grid.Row="0" Orientation="Horizontal">
+                            <TextBlock Text="{Binding SenderName}" VerticalAlignment="Bottom" FontWeight="Bold"/>
+                            <TextBlock Foreground="DimGray" FontSize="9" HorizontalAlignment="Center" VerticalAlignment="Bottom" Padding="5,0,0,0" Text="{Binding Time}"/>
+                        </StackPanel>
+
+                        <TextBlock Grid.Row="1" FontSize="12" Text="{Binding Content}" Padding="5,5,0,0"/>
+
+
+                    </Grid>
+                    
+                    
+
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+            <ListBox.ItemContainerStyle>
+                <Style TargetType="{x:Type ListBoxItem}">
+                    <Setter Property="Focusable" Value="False"/>
+                </Style>
+            </ListBox.ItemContainerStyle>
+        </ListBox>
+
 
 
         <Label Grid.Row="0" Grid.Column="0" Content="rooms" FontSize="14" FontWeight="Bold" Foreground="GhostWhite" Background="#A9A9A9" FontFamily="Verdana"></Label>
