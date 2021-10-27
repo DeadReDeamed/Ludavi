@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
 using TCPHandlerNameSpace;
 
 namespace Ludavi_Client.ViewModels
@@ -43,8 +44,19 @@ namespace Ludavi_Client.ViewModels
             if (data[(int)TCPHandler.StringIndex.MESSAGE] == "UPDATEROOMS")
             {
                 MainWindowViewModel.roomManager = new Models.RoomManager(handler, MainWindowViewModel.ID);
-                MainWindowViewModel.RoomsCollection.Clear();
-                MainWindowViewModel.roomManager.rooms.ForEach(room => { MainWindowViewModel.RoomsCollection.Add(room); });
+
+                Application.Current.Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    this.MainWindowViewModel.RoomsCollection.Clear();
+                }));
+
+                MainWindowViewModel.roomManager.rooms.ForEach(room =>
+                {
+                    Application.Current.Dispatcher.BeginInvoke(new Action(() =>
+                        {
+                            this.MainWindowViewModel.RoomsCollection.Add(room);
+                        }));
+                });
             }
         }
     }
