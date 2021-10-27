@@ -1,11 +1,15 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Net.Sockets;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using Ludavi_Client.Models;
 using Ludavi_Client.Views;
-
+using Newtonsoft.Json;
+using TCPHandlerNameSpace;
 
 namespace Ludavi_Client.ViewModels
 {
@@ -54,22 +58,49 @@ namespace Ludavi_Client.ViewModels
 
         #endregion
 
+        private static TCPHandler tcpHandler;
+        public static uint ID { get; private set; }
+        public RoomManager roomManager { get; set; }
+        private TcpClient client;
 
         public MainWindowViewModel()
         {
             this.openRoomDialogCommand = new RelayCommand(OnOpenRoomDialog);
             this.openLoginDialogCommand = new RelayCommand(OnOpenLoginDialog);
+            
+            connectToServer();
+            roomManager = new RoomManager(tcpHandler, ID);
+            roomManager.SelectRoom(10);
             roomsCollection = new();
+
+            roomManager.rooms.ForEach(room => RoomsCollection.Add(room));
+
+            NetworkManager network = new NetworkManager(tcpHandler, this);
+
             roomName = "Welcome";
             roomTopic = "please select or add a room to start communicating!";
-
+            
 
             SelectedItemChangedCommand = new RelayCommand((selectedItem) =>
             {
                 initRoom((Room)selectedItem);
             });
+        }
 
+        public async void SendMessageToRoom(string message)
+        {
+            await tcpHandler.SendMessage(ID, roomManager.currentRoom.RoomID.ToString(), TCPHandler.MessageTypes.CHAT, message);
+        }
 
+        public void connectToServer()
+        {
+            client = new TcpClient();
+            client.Connect("localhost", 80);
+            tcpHandler = new TCPHandler(client.GetStream());
+            tcpHandler.SendMessage(0, "", TCPHandler.MessageTypes.LOGIN, "Luca Password");
+            string[] message = tcpHandler.ReadMessage();
+            Console.WriteLine(message[((int)TCPHandler.StringIndex.MESSAGE)]);
+            ID = uint.Parse(message[((int)TCPHandler.StringIndex.ID)]);
         }
 
         private void OnOpenLoginDialog(object paramater)
@@ -109,6 +140,7 @@ namespace Ludavi_Client.ViewModels
             roomDialog.ShowDialog();
             AddRoomViewModel roomDialogContext = (AddRoomViewModel)(roomDialog.DataContext);
             Room result = roomDialogContext.RoomResult;
+            tcpHandler.SendMessage(ID, "", TCPHandler.MessageTypes.ROOM, "ADDROOM " + JsonConvert.SerializeObject(result));
             return result;
         }
 

@@ -71,8 +71,8 @@
                 <ColumnDefinition Width="*"></ColumnDefinition>
                 <ColumnDefinition Width="auto"></ColumnDefinition>
             </Grid.ColumnDefinitions>
-            <TextBox Grid.Column="0"></TextBox>
-            <Button Grid.Column="1"> -> </Button>
+            <TextBox Grid.Column="0" Name="messageTextBox"></TextBox>
+            <Button Grid.Column="1" Click="Button_Click"> -> </Button>
         </Grid>
         
     </Grid>

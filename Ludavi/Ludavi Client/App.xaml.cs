@@ -15,7 +15,6 @@ namespace Ludavi_Client
     {
         protected override void OnStartup(StartupEventArgs args)
         {
-            connectToServer();
         }   
     }
 }

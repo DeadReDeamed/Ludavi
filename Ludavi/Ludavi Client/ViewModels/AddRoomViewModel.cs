@@ -91,7 +91,7 @@ namespace Ludavi_Client.ViewModels
             
             if (CheckForValidRoomValues(RoomName, RoomTopic, RoomType))
             {
-                Room room = new Room(RoomName, RoomTopic, RoomType);
+                Room room = new Room(RoomName, RoomTopic, RoomType, 1);
                 this.CloseDialogWithResult(parameter as Window, room);
             }
             

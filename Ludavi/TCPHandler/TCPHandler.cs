@@ -4,13 +4,19 @@ using System.Text;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 
-namespace TCPHandler
+namespace TCPHandlerNameSpace
 {
     public class TCPHandler
     {
-        public static async Task SendMessage(uint id, string receiver, MessageTypes type, string message, NetworkStream stream)
+        private NetworkStream stream;
+
+        public TCPHandler(NetworkStream stream)
         {
-            string dataString = $"{id} {receiver} {type.ToString()} {message}";
+            this.stream = stream;
+        }
+        public async Task<Task> SendMessage(uint id, string roomID, MessageTypes type, string message)
+        {
+            string dataString = $"{id} {roomID} {(int)type} {message}";
             byte[] length = BitConverter.GetBytes(dataString.Length);
             byte[] stringBytes = Encoding.ASCII.GetBytes(dataString);
             byte[] dataBytes = new byte[length.Length + stringBytes.Length];
@@ -18,14 +24,40 @@ namespace TCPHandler
             length.CopyTo(dataBytes, 0);
             stream.Write(dataBytes);
             stream.Flush();
+            return Task.CompletedTask;
         }
 
-        public static async Task<string[]> ReadMessage(NetworkStream stream) 
-        { 
+        public async Task<Task> SendMessage(string[] data)
+        {
+            string dataString = "";
+            for(int i = 0; i < data.Length; i++)
+            {
+                dataString += data[i] + " ";
+            }
+            byte[] length = BitConverter.GetBytes(dataString.Length);
+            byte[] stringBytes = Encoding.ASCII.GetBytes(dataString);
+            byte[] dataBytes = new byte[length.Length + stringBytes.Length];
+            Encoding.ASCII.GetBytes(dataString).CopyTo(dataBytes, 4);
+            length.CopyTo(dataBytes, 0);
+            stream.Write(dataBytes);
+            stream.Flush();
+            return Task.CompletedTask;
+        }
+        public string[] ReadMessage()
+        {
             byte[] buffer = new byte[4];
             stream.Read(buffer, 0, buffer.Length);
             int length = BitConverter.ToInt32(buffer);
             buffer = new byte[length];
+            //int currentLength = 0;
+            //if(length > 1496)
+            //{
+            //    while(length > 1500)
+            //    {
+            //        stream.Read(buffer, currentLength, 1500);
+
+            //    }
+            //}
             stream.Read(buffer, 0, length);
             string dataString = Encoding.ASCII.GetString(buffer);
             string[] dataStringArray = dataString.Split(" ");
@@ -34,24 +66,26 @@ namespace TCPHandler
             {
                 message += dataStringArray[i] + " ";
             }
-
+            message = message.Trim();
             dataStringArray = new string[] {dataStringArray[0], dataStringArray[1], dataStringArray[2], message };
             return dataStringArray;
         }
+       
 
         public enum MessageTypes
         {
-            CHAT,
-            VOICE,
-            DATA,
-            STATUS,
-            LOGIN
+            CHAT = 0,
+            VOICE = 1,
+            DATA = 2,
+            STATUS = 3,
+            LOGIN = 4,
+            ROOM = 5
         }
 
         public enum StringIndex
         {
             ID = 0,
-            RECEIVER = 1,
+            ROOMID = 1,
             TYPE = 2,
             MESSAGE = 3
         }
