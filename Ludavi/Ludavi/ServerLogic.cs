@@ -18,6 +18,7 @@ namespace Server
         private static List<Room> rooms;
         private delegate T sendToAll<T>(string[] data);
         public static Dictionary<TCPHandler.MessageTypes, Action<string[]>> functions;
+        public static Dictionary<Room, List<Message>> roomsAndMessages;
 
         //public static void main(string[] args)
         //{
@@ -27,14 +28,17 @@ namespace Server
         private delegate void Tasks(string[] data);
         public static void RunServer()
         {
+            roomsAndMessages = new Dictionary<Room, List<Message>>();
             clients = new Dictionary<uint, ServerClient>();
             functions = new Dictionary<TCPHandler.MessageTypes, Action<string[]>>();
-            functions.Add(TCPHandler.MessageTypes.CHAT, SendMessageToAllUsers);
+            functions.Add(TCPHandler.MessageTypes.CHAT, SendChatToAllUsers);
             functions.Add(TCPHandler.MessageTypes.ROOM, HandleRoomManagement);
             tcpListener = new TcpListener(System.Net.IPAddress.Any, 80);
             tcpListener.Start();
             rooms = new List<Room>();
-            rooms.Add(new Room("testRoom", "bla bla", (int)RoomType.Text, 10));
+            Room general = new Room("General", "Just your general chatroom", (int)RoomType.Text,0);
+            rooms.Add(general);
+            roomsAndMessages.Add(general, new List<Message>());
             tcpListener.BeginAcceptTcpClient(new AsyncCallback(connectClientsToServer), null);
 
         }
@@ -61,6 +65,19 @@ namespace Server
             tcpListener.BeginAcceptTcpClient(new AsyncCallback(connectClientsToServer), null);
         }
 
+        public static async void SendChatToAllUsers(string[] data)
+        {
+            Room currentRoom = null;
+            foreach(Room r in rooms)
+            {
+                if(r.RoomID == uint.Parse(data[(int)TCPHandler.StringIndex.ROOMID])){
+                    currentRoom = r;
+                }
+            }
+            roomsAndMessages[currentRoom].Add(new Message(data[(int)TCPHandler.StringIndex.ID], DateTime.Now, data[(int)TCPHandler.StringIndex.MESSAGE]));
+            SendMessageToAllUsers(data);
+        }
+
         public static async void SendMessageToAllUsers(string[] data)
         {
             sendToAll<Task> send = tcpHandler.SendMessage;
@@ -81,10 +98,18 @@ namespace Server
             {
                 case "GETROOMS":
                     await clients[uint.Parse(data[(int)TCPHandler.StringIndex.ID])].handler.SendMessage(uint.Parse(data[(int)TCPHandler.StringIndex.ID]), "", TCPHandler.MessageTypes.ROOM, JsonConvert.SerializeObject(rooms));
+                    List<List<Message>> messagesPerList = new List<List<Message>>();
+                    foreach(KeyValuePair<Room,List<Message>> key in roomsAndMessages){
+                        messagesPerList.Add(key.Value);
+                    }
+                    await clients[uint.Parse(data[(int)TCPHandler.StringIndex.ID])].handler.SendMessage(uint.Parse(data[(int)TCPHandler.StringIndex.ID]), "", TCPHandler.MessageTypes.ROOM, JsonConvert.SerializeObject(messagesPerList));
+
                     break;
                 case "ADDROOM":
-                    rooms.Add(JsonConvert.DeserializeObject<Room>(messageSplit[1]));
                     string[] stringdata = { "s", "s", ((int)TCPHandler.MessageTypes.ROOM).ToString(), "UPDATEROOMS" };
+                    Room newRoom = JsonConvert.DeserializeObject<Room>(messageSplit[1]);
+                    rooms.Add(newRoom);
+                    roomsAndMessages.Add(newRoom, new List<Message>());
                     SendMessageToAllUsers(stringdata);
                     break;
             }

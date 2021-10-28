@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Ludavi_Client.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using TCPHandlerNameSpace;
+using TCPHandlerNameSpace.Models;
 
 namespace Ludavi_Client.ViewModels
 {
@@ -36,14 +38,19 @@ namespace Ludavi_Client.ViewModels
 
         private void handleChatData(string[] data)
         {
-            MainWindowViewModel.Messages.Add(new TCPHandlerNameSpace.Models.Message(data[(int)TCPHandler.StringIndex.ID], DateTime.Now, data[(int)TCPHandler.StringIndex.MESSAGE]));
+            RoomManager roomManager = MainWindowViewModel.roomManager;
+            Message message = new Message(data[(int)TCPHandler.StringIndex.ID], DateTime.Now, data[(int)TCPHandler.StringIndex.MESSAGE]);
+            roomManager.AddMessageToRoom(uint.Parse(data[(int)TCPHandler.StringIndex.ROOMID]), message);
+            if (uint.Parse(data[(int)TCPHandler.StringIndex.ROOMID]) == roomManager.currentRoom.RoomID) {
+                MainWindowViewModel.Messages.Add(message);
+            }
         }
 
         private void handleRoomData(string[] data)
         {
             if (data[(int)TCPHandler.StringIndex.MESSAGE] == "UPDATEROOMS")
             {
-                MainWindowViewModel.roomManager = new Models.RoomManager(handler, MainWindowViewModel.ID);
+                MainWindowViewModel.roomManager = new Models.RoomManager(handler, MainWindowViewModel.ID, this.MainWindowViewModel);
 
                 Application.Current.Dispatcher.BeginInvoke(new Action(() =>
                 {

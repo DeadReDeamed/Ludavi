@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Net.Sockets;
@@ -78,7 +79,7 @@ namespace Ludavi_Client.ViewModels
         public static uint ID { get; private set; }
         public RoomManager roomManager { get; set; }
         private TcpClient client;
-
+        
         public MainWindowViewModel()
         {
             this.openRoomDialogCommand = new RelayCommand(OnOpenRoomDialog);
@@ -86,8 +87,7 @@ namespace Ludavi_Client.ViewModels
             
             
             connectToServer();
-            roomManager = new RoomManager(tcpHandler, ID);
-            roomManager.SelectRoom(10);
+            roomManager = new RoomManager(tcpHandler, ID, this);
             roomsCollection = new ();
 
             roomManager.rooms.ForEach(room => RoomsCollection.Add(room));
@@ -96,7 +96,10 @@ namespace Ludavi_Client.ViewModels
 
             roomName = "Welcome";
             roomTopic = "please select or add a room to start communicating!";
-            Messages = new ObservableCollectionEx<Message>();
+            if(Messages == null)
+            {
+                Messages = new ObservableCollectionEx<Message>();
+            }
             
 
             SelectedItemChangedCommand = new RelayCommand((selectedItem) =>
