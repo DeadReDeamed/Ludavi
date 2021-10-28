@@ -115,13 +115,13 @@ namespace Ludavi_Client.ViewModels
             await tcpHandler.SendMessage(ID, roomManager.currentRoom.RoomID.ToString(), TCPHandler.MessageTypes.CHAT, message);
         }
 
-        public void connectToServer()
+        public async void connectToServer()
         {
             client = new TcpClient();
             client.Connect("localhost", 80);
             tcpHandler = new TCPHandler(client.GetStream());
             tcpHandler.SendMessage(0, "", TCPHandler.MessageTypes.LOGIN, "Luca Password");
-            string[] message = tcpHandler.ReadMessage();
+            string[] message = await tcpHandler.ReadMessage();
             Console.WriteLine(message[((int)TCPHandler.StringIndex.MESSAGE)]);
             ID = uint.Parse(message[((int)TCPHandler.StringIndex.ID)]);
         }

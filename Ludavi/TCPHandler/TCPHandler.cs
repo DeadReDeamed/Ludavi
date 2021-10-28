@@ -43,22 +43,13 @@ namespace TCPHandlerNameSpace
             stream.Flush();
             return Task.CompletedTask;
         }
-        public string[] ReadMessage()
+        public async Task<string[]> ReadMessage()
         {
             byte[] buffer = new byte[4];
             stream.Read(buffer, 0, buffer.Length);
             int length = BitConverter.ToInt32(buffer);
             buffer = new byte[length];
-            //int currentLength = 0;
-            //if(length > 1496)
-            //{
-            //    while(length > 1500)
-            //    {
-            //        stream.Read(buffer, currentLength, 1500);
-
-            //    }
-            //}
-            stream.Read(buffer, 0, length);
+            await stream.ReadAsync(buffer, 0, length);
             string dataString = Encoding.ASCII.GetString(buffer);
             string[] dataStringArray = dataString.Split(" ");
             string message = "";

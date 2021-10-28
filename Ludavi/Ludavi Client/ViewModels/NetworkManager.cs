@@ -14,7 +14,7 @@ namespace Ludavi_Client.ViewModels
     class NetworkManager
     {
         private Dictionary<TCPHandler.MessageTypes, Action<string[]>> functions;
-        private TCPHandlerNameSpace.TCPHandler handler;
+        private TCPHandler handler;
         public bool Connected { get; set; }
         public MainWindowViewModel MainWindowViewModel;
         public NetworkManager(TCPHandlerNameSpace.TCPHandler tcphandler, MainWindowViewModel mainWindowViewModel)
@@ -26,10 +26,10 @@ namespace Ludavi_Client.ViewModels
             this.handler = tcphandler;
             Connected = true;
 
-            new Thread(() => {
+            new Thread( async () => {
                 while (Connected)
                 {
-                    string[] data = handler.ReadMessage();
+                    string[] data = await handler.ReadMessage();
                     functions[(TCPHandler.MessageTypes)int.Parse(data[(int)TCPHandler.StringIndex.TYPE])].Invoke(data);
                 }
             }).Start(); ;

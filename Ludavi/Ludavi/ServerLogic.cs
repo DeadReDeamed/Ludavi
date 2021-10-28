@@ -48,7 +48,7 @@ namespace Server
             var tcpClient = tcpListener.EndAcceptTcpClient(ar);
             tcpHandler = new TCPHandler(tcpClient.GetStream());
             Console.WriteLine($"Added: {tcpClient.Client.RemoteEndPoint} to server");
-            string[] dataString = tcpHandler.ReadMessage();
+            string[] dataString = await tcpHandler.ReadMessage();
 
             if (dataString[((int)TCPHandler.StringIndex.ID)] == "0") {
                 uint randomId = (uint)(new Random().Next(1, int.MaxValue));

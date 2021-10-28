@@ -46,7 +46,7 @@ namespace Ludavi_Client
         {
             if (this.DataContext != null && (this.DataContext.GetType() == typeof(MainWindowViewModel)))
             {
-                MainWindowViewModel vm = (MainWindowViewModel) this.DataContext;
+                MainWindowViewModel vm = (MainWindowViewModel)this.DataContext;
                 vm.OpenLoginDialogCommand.Execute("nothing");
             }
         }

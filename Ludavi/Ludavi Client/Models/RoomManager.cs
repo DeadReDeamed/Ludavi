@@ -30,11 +30,11 @@ namespace Ludavi_Client.Models
 
         }
 
-        public void UpdatRooms()
+        public async void UpdatRooms()
         {
             rooms.Clear();
             handler.SendMessage(userID, "server", TCPHandler.MessageTypes.ROOM, "GETROOMS");
-            string[] message = handler.ReadMessage();
+            string[] message = await handler.ReadMessage();
             string fullMessage = "";
             for (int i = (int)TCPHandler.StringIndex.MESSAGE; i < message.Length; i++)
             {
@@ -43,7 +43,7 @@ namespace Ludavi_Client.Models
             fullMessage = fullMessage.Trim();
             rooms = JsonConvert.DeserializeObject<List<Room>>(fullMessage);
 
-            message = handler.ReadMessage();
+            message = await handler.ReadMessage();
             fullMessage = "";
             for (int i = (int)TCPHandler.StringIndex.MESSAGE; i < message.Length; i++)
             {

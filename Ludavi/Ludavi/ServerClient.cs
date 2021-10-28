@@ -25,14 +25,14 @@ namespace Server
             this.ID = ID;
             this.client = client;
             connected = true;
-            new Thread(() => { startListening(); }).Start();
+            new Thread(async () => { startListening(); }).Start();
         }
 
-        public void startListening()
+        public async void startListening()
         {
             while (connected)
             {
-                string[] data = handler.ReadMessage();
+                string[] data = await handler.ReadMessage();
 
                 try
                 {
