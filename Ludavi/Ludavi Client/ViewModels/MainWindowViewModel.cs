@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using Ludavi_Client.Models;
+using Ludavi_Client.Util;
 using Ludavi_Client.Views;
 using Newtonsoft.Json;
 using TCPHandlerNameSpace;
@@ -46,8 +47,8 @@ namespace Ludavi_Client.ViewModels
         #endregion
 
         #region define roomsCollection
-        private ObservableCollection<Room> roomsCollection { get; set; }
-        public ObservableCollection<Room> RoomsCollection
+        private ObservableCollectionEx<Room> roomsCollection { get; set; }
+        public ObservableCollectionEx<Room> RoomsCollection
         {
             get { return roomsCollection; }
             set
@@ -60,8 +61,8 @@ namespace Ludavi_Client.ViewModels
         #endregion
 
         #region define Messages
-        private ObservableCollection<Message> messages { get; set; }
-        public ObservableCollection<Message> Messages
+        private ObservableCollectionEx<Message> messages { get; set; }
+        public ObservableCollectionEx<Message> Messages
         {
             get { return messages; }
             set
@@ -77,16 +78,18 @@ namespace Ludavi_Client.ViewModels
         public static uint ID { get; private set; }
         public RoomManager roomManager { get; set; }
         private TcpClient client;
+        private MainWindow mainWindow;
 
-        public MainWindowViewModel()
+        public MainWindowViewModel(MainWindow mainWindow)
         {
             this.openRoomDialogCommand = new RelayCommand(OnOpenRoomDialog);
             this.openLoginDialogCommand = new RelayCommand(OnOpenLoginDialog);
+            this.mainWindow = mainWindow;
             
             connectToServer();
             roomManager = new RoomManager(tcpHandler, ID);
             roomManager.SelectRoom(10);
-            roomsCollection = new();
+            roomsCollection = new ();
 
             roomManager.rooms.ForEach(room => RoomsCollection.Add(room));
 
@@ -94,16 +97,8 @@ namespace Ludavi_Client.ViewModels
 
             roomName = "Welcome";
             roomTopic = "please select or add a room to start communicating!";
-            Messages = new ObservableCollection<Message>();
-            Messages.Add(new Message("David", DateTime.Now, "Hello"));
-            Messages.Add(new Message("David", DateTime.Now, "and welcome to this app"));
-            Messages.Add(new Message("Luca", DateTime.Now, "ok nice"));
-            Messages.Add(new Message("David", DateTime.Now.AddHours(1), "ja toch"));
-            Messages.Add(new Message("Luca", DateTime.Now.AddHours(2).AddMinutes(1), "best wel raar dit"));
-            Messages.Add(new Message("David", DateTime.Now.AddHours(2), "ja, dit is een fake dialoog"));
-            Messages.Add(new Message("David", DateTime.Now.AddHours(2).AddMinutes(10), "voelt meer als een monoloog"));
-            Messages.Add(new Message("David", DateTime.Now.AddHours(4), "bruh"));
-            Messages.Add(new Message("Luca", DateTime.Now.AddHours(4).AddMinutes(30), "bruh"));
+            Messages = new ObservableCollectionEx<Message>();
+            
 
             SelectedItemChangedCommand = new RelayCommand((selectedItem) =>
             {

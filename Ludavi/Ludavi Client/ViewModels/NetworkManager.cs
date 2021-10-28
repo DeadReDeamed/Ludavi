@@ -36,7 +36,7 @@ namespace Ludavi_Client.ViewModels
 
         private void handleChatData(string[] data)
         {
-
+            
         }
 
         private void handleRoomData(string[] data)
