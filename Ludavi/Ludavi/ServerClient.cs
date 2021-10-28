@@ -32,7 +32,7 @@ namespace Server
         {
             while (connected)
             {
-                string[] data = await handler.ReadMessage();
+                string[] data = handler.ReadMessage();
 
                 try
                 {

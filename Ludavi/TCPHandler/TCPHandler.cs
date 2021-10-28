@@ -34,6 +34,7 @@ namespace TCPHandlerNameSpace
             {
                 dataString += data[i] + " ";
             }
+            dataString = dataString.Trim();
             byte[] length = BitConverter.GetBytes(dataString.Length);
             byte[] stringBytes = Encoding.ASCII.GetBytes(dataString);
             byte[] dataBytes = new byte[length.Length + stringBytes.Length];
@@ -43,22 +44,18 @@ namespace TCPHandlerNameSpace
             stream.Flush();
             return Task.CompletedTask;
         }
-        public async Task<string[]> ReadMessage()
+        public string[] ReadMessage()
         {
             byte[] buffer = new byte[4];
             stream.Read(buffer, 0, buffer.Length);
             int length = BitConverter.ToInt32(buffer);
             buffer = new byte[length];
-            await stream.ReadAsync(buffer, 0, length);
+            stream.Read(buffer, 0, length);
             string dataString = Encoding.ASCII.GetString(buffer);
-            string[] dataStringArray = dataString.Split(" ");
-            string message = "";
-            for(int i = ((int)StringIndex.MESSAGE); i < dataStringArray.Length; i++)
-            {
-                message += dataStringArray[i] + " ";
-            }
-            message = message.Trim();
+            string[] dataStringArray = dataString.Split(" ", 4);
+            string message = dataStringArray[(int)StringIndex.MESSAGE];
             dataStringArray = new string[] {dataStringArray[0], dataStringArray[1], dataStringArray[2], message };
+            stream.Flush();
             return dataStringArray;
         }
        

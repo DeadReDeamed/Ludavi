@@ -1,4 +1,5 @@
 ﻿using Ludavi_Client.Models;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,7 +30,7 @@ namespace Ludavi_Client.ViewModels
             new Thread( async () => {
                 while (Connected)
                 {
-                    string[] data = await handler.ReadMessage();
+                    string[] data = handler.ReadMessage();
                     functions[(TCPHandler.MessageTypes)int.Parse(data[(int)TCPHandler.StringIndex.TYPE])].Invoke(data);
                 }
             }).Start(); ;
@@ -48,23 +49,32 @@ namespace Ludavi_Client.ViewModels
 
         private void handleRoomData(string[] data)
         {
-            if (data[(int)TCPHandler.StringIndex.MESSAGE] == "UPDATEROOMS")
+            string[] message = data[(int)TCPHandler.StringIndex.MESSAGE].Split(" ", 2);
+            switch (message[0])
             {
-                MainWindowViewModel.roomManager.UpdatRooms();
+                case "UPDATEROOMS":
+                    MainWindowViewModel.roomManager.UpdateRooms();
 
-                Application.Current.Dispatcher.BeginInvoke(new Action(() =>
-                {
-                    this.MainWindowViewModel.RoomsCollection.Clear();
-                }));
-
-                MainWindowViewModel.roomManager.rooms.ForEach(room =>
-                {
                     Application.Current.Dispatcher.BeginInvoke(new Action(() =>
-                        {
-                            this.MainWindowViewModel.RoomsCollection.Add(room);
-                        }));
-                });
-            }
+                    {
+                        this.MainWindowViewModel.RoomsCollection.Clear();
+                    }));
+
+                    MainWindowViewModel.roomManager.rooms.ForEach(room =>
+                    {
+                        Application.Current.Dispatcher.BeginInvoke(new Action(() =>
+                            {
+                                this.MainWindowViewModel.RoomsCollection.Add(room);
+                            }));
+                    });
+                    break;
+                case "RETURNUSERS":
+                    MainWindowViewModel.VoiceUsers = new Util.ObservableCollectionEx<User>(JsonConvert.DeserializeObject<List<User>>(message[1]));
+                    break;
+                case "RETURNROOMS":
+                    MainWindowViewModel.roomManager.UpdateRoomList(message[1]);
+                    break;
+            } 
         }
     }
 }

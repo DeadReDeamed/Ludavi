@@ -48,7 +48,7 @@ namespace Server
             var tcpClient = tcpListener.EndAcceptTcpClient(ar);
             tcpHandler = new TCPHandler(tcpClient.GetStream());
             Console.WriteLine($"Added: {tcpClient.Client.RemoteEndPoint} to server");
-            string[] dataString = await tcpHandler.ReadMessage();
+            string[] dataString = tcpHandler.ReadMessage();
 
             if (dataString[((int)TCPHandler.StringIndex.ID)] == "0") {
                 uint randomId = (uint)(new Random().Next(1, int.MaxValue));
@@ -97,7 +97,7 @@ namespace Server
             switch (messageSplit[0])
             {
                 case "GETROOMS":
-                    await clients[uint.Parse(data[(int)TCPHandler.StringIndex.ID])].handler.SendMessage(uint.Parse(data[(int)TCPHandler.StringIndex.ID]), "", TCPHandler.MessageTypes.ROOM, JsonConvert.SerializeObject(rooms));
+                    await clients[uint.Parse(data[(int)TCPHandler.StringIndex.ID])].handler.SendMessage(uint.Parse(data[(int)TCPHandler.StringIndex.ID]), "", TCPHandler.MessageTypes.ROOM, "RETURNROOMS " + "ROOMS " + JsonConvert.SerializeObject(rooms));
                     List<List<Message>> messagesPerList = new List<List<Message>>();
                     List<List<User>> usersPerList = new List<List<User>>();
                     foreach(KeyValuePair<Room, ServerList> key in roomsAndMessages){
@@ -106,28 +106,32 @@ namespace Server
                             messagesPerList.Add(((MessageList)key.Value).list);
                         } 
                     }
-                    await clients[uint.Parse(data[(int)TCPHandler.StringIndex.ID])].handler.SendMessage(uint.Parse(data[(int)TCPHandler.StringIndex.ID]), "", TCPHandler.MessageTypes.ROOM, JsonConvert.SerializeObject(messagesPerList));
+                    await clients[uint.Parse(data[(int)TCPHandler.StringIndex.ID])].handler.SendMessage(uint.Parse(data[(int)TCPHandler.StringIndex.ID]), "", TCPHandler.MessageTypes.ROOM, "RETURNROOMS " + "MESSAGES " + JsonConvert.SerializeObject(messagesPerList));
                    
                     break;
                 case "ADDROOM":
-                    string[] stringdata = { "s", "s", ((int)TCPHandler.MessageTypes.ROOM).ToString(), "UPDATEROOMS" };
                     Room newRoom = JsonConvert.DeserializeObject<Room>(messageSplit[1]);
-                    rooms.Add(newRoom);
-                    if (newRoom.Type == (int)RoomType.Text)
+                    if (newRoom != null)
                     {
-                        roomsAndMessages.Add(newRoom, new MessageList(new List<Message>()));
-                    } else if(newRoom.Type == (int)RoomType.Voice)
-                    {
-                        roomsAndMessages.Add(newRoom, new VoiceList(new List<User>()));
+                        rooms.Add(newRoom);
+                        string[] stringdata = { "s", "s", ((int)TCPHandler.MessageTypes.ROOM).ToString(), "UPDATEROOMS" };
+                        if (newRoom.Type == (int)RoomType.Text)
+                        {
+                            roomsAndMessages.Add(newRoom, new MessageList(new List<Message>()));
+                        }
+                        else if (newRoom.Type == (int)RoomType.Voice)
+                        {
+                            roomsAndMessages.Add(newRoom, new VoiceList(new List<User>()));
+                        }
+                        SendMessageToAllUsers(stringdata);
                     }
-                    SendMessageToAllUsers(stringdata);
                     break;
                 case "GETUSERSFROMROOM":
                     foreach(KeyValuePair<Room, ServerList> key in roomsAndMessages)
                     {
                         if(key.Key.RoomID == uint.Parse(messageSplit[1]))
                         {
-                            await clients[uint.Parse(data[(int)TCPHandler.StringIndex.ID])].handler.SendMessage(uint.Parse(data[(int)TCPHandler.StringIndex.ID]), "", TCPHandler.MessageTypes.ROOM, JsonConvert.SerializeObject(((VoiceList)key.Value).list));
+                            await clients[uint.Parse(data[(int)TCPHandler.StringIndex.ID])].handler.SendMessage(uint.Parse(data[(int)TCPHandler.StringIndex.ID]), "", TCPHandler.MessageTypes.ROOM, "RETURNUSERS " + JsonConvert.SerializeObject(((VoiceList)key.Value).list));
                             break;
 
                         }

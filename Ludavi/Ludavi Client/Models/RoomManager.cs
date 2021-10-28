@@ -20,71 +20,63 @@ namespace Ludavi_Client.Models
         private uint userID;
         private TCPHandler handler;
         private MainWindowViewModel mainWindow;
+        private int indexOfCurrentRoom;
         public RoomManager(TCPHandler handler, uint userID, MainWindowViewModel mainWindow)
         {
             this.userID = userID;
             rooms = new List<Room>();
             this.handler = handler;
             this.mainWindow = mainWindow;
-            UpdatRooms();
+            UpdateRooms();
 
         }
 
-        public async void UpdatRooms()
+        public void UpdateRoomList(string dataMessage)
         {
-            int indexOfCurrentRoom = rooms.IndexOf(currentRoom);
-            rooms.Clear();
-            handler.SendMessage(userID, "server", TCPHandler.MessageTypes.ROOM, "GETROOMS");
-            string[] message = await handler.ReadMessage();
-            string fullMessage = "";
-            for (int i = (int)TCPHandler.StringIndex.MESSAGE; i < message.Length; i++)
-            {
-                fullMessage += message[i] + " ";
-            }
-            fullMessage = fullMessage.Trim();
-            rooms = JsonConvert.DeserializeObject<List<Room>>(fullMessage);
 
-            message = await handler.ReadMessage();
-            fullMessage = "";
-            for (int i = (int)TCPHandler.StringIndex.MESSAGE; i < message.Length; i++)
+            string[] dataString = dataMessage.Split(" ", 2);
+            if (dataString[0] == "ROOMS")
             {
-                fullMessage += message[i] + " ";
-            }
-            fullMessage = fullMessage.Trim();
-            List<List<Message>> messagesList = JsonConvert.DeserializeObject<List<List<Message>>>(fullMessage);
+                indexOfCurrentRoom = rooms.IndexOf(currentRoom);
+                rooms.Clear();
+                rooms = JsonConvert.DeserializeObject<List<Room>>(dataString[1]);
+            } else if (dataString[0] == "MESSAGES") 
+            {
+                List<List<Message>> messagesList = JsonConvert.DeserializeObject<List<List<Message>>>(dataString[1]);
 
-            roomsAndMessages = new Dictionary<Room, List<Message>>();
-            int messageListInt = 0;
-            for (int i = 0; i < rooms.Count; i++)
-            {
-                if (rooms[i].Type == (int)RoomType.Text)
+                roomsAndMessages = new Dictionary<Room, List<Message>>();
+                int messageListInt = 0;
+                for (int i = 0; i < rooms.Count; i++)
                 {
-                    roomsAndMessages.Add(rooms[i], messagesList[messageListInt]);
-                    messageListInt++;
+                    if (rooms[i].Type == (int)RoomType.Text)
+                    {
+                        roomsAndMessages.Add(rooms[i], messagesList[messageListInt]);
+                        messageListInt++;
+                    }
                 }
+
+                if (currentRoom == null)
+                {
+                    currentRoom = rooms[0];
+                }
+                else
+                {
+                    currentRoom = rooms[indexOfCurrentRoom];
+                }
+                mainWindow.Messages = new ObservableCollectionEx<Message>(roomsAndMessages[currentRoom]);
+                mainWindow.RoomsCollection = new ObservableCollectionEx<Room>(rooms);
             }
-            
-            if (currentRoom == null)
-            {
-                currentRoom = rooms[0];
-            } else
-            {
-                currentRoom = rooms[indexOfCurrentRoom];
-            }
-            mainWindow.Messages = new ObservableCollectionEx<Message>(roomsAndMessages[currentRoom]);
         }
 
-        public async Task<List<User>> GetVoiceUsers()
+        public void UpdateRooms()
+        {
+            handler.SendMessage(userID, "server", TCPHandler.MessageTypes.ROOM, "GETROOMS");
+        }
+
+        public void GetVoiceUsers()
         {
             handler.SendMessage(userID, "server", TCPHandler.MessageTypes.ROOM, "GETUSERSFROMROOM " + currentRoom.RoomID);
-            string[] message = await handler.ReadMessage();
-            string fullMessage = "";
-            for (int i = (int)TCPHandler.StringIndex.MESSAGE; i < message.Length; i++)
-            {
-                fullMessage += message[i] + " ";
-            }
-            fullMessage = fullMessage.Trim();
-            return JsonConvert.DeserializeObject<List<User>>(fullMessage);
+           
         }
 
         public void SelectRoom(uint roomID)

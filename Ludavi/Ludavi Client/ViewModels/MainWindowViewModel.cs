@@ -162,7 +162,7 @@ namespace Ludavi_Client.ViewModels
             client.Connect("localhost", 80);
             tcpHandler = new TCPHandler(client.GetStream());
             tcpHandler.SendMessage(0, "", TCPHandler.MessageTypes.LOGIN, "Luca Password");
-            string[] message = await tcpHandler.ReadMessage();
+            string[] message = tcpHandler.ReadMessage();
             Console.WriteLine(message[((int)TCPHandler.StringIndex.MESSAGE)]);
             ID = uint.Parse(message[((int)TCPHandler.StringIndex.ID)]);
         }
@@ -184,7 +184,7 @@ namespace Ludavi_Client.ViewModels
             } else if(room.Type == (int)RoomType.Voice)
             {
                 roomManager.SelectRoom(room.RoomID);
-                VoiceUsers = new ObservableCollectionEx<User>(await roomManager.GetVoiceUsers());
+                roomManager.GetVoiceUsers();                
             }
         }
 
@@ -227,7 +227,7 @@ namespace Ludavi_Client.ViewModels
             
             Console.WriteLine(room);
             RoomsCollection.Add(room);
-            initRoom(room);
+            initRoom(roomManager.currentRoom);
         }
 
         #endregion
