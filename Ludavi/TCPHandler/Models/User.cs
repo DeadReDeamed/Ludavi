@@ -12,9 +12,11 @@ namespace TCPHandlerNameSpace.Models
         {
             this.UserId = id;
             this.Name = name;
+            this.UserIdShort = "#" + UserId.ToString().Substring(0,4);
         }
 
-        public Guid UserId { get; set; }
+        public Guid UserId { get; private set; }
+        public string UserIdShort { get; private set; }
         public string Name { get; set; }
 
 

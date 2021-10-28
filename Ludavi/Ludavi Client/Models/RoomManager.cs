@@ -37,7 +37,14 @@ namespace Ludavi_Client.Models
             string[] dataString = dataMessage.Split(" ", 2);
             if (dataString[0] == "ROOMS")
             {
-                indexOfCurrentRoom = rooms.IndexOf(currentRoom);
+                if(rooms.Count == 0)
+                {
+                    indexOfCurrentRoom = 0;
+                } else
+                {
+                    indexOfCurrentRoom = rooms.IndexOf(currentRoom);
+
+                }
                 rooms.Clear();
                 rooms = JsonConvert.DeserializeObject<List<Room>>(dataString[1]);
             } else if (dataString[0] == "MESSAGES") 
