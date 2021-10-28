@@ -122,9 +122,9 @@
                 <ColumnDefinition Width="*"></ColumnDefinition>
                 <ColumnDefinition Width="auto"></ColumnDefinition>
             </Grid.ColumnDefinitions>
-            <TextBox Grid.Column="0" Name="messageTextBox" Grid.ColumnSpan="1"
-                     FontSize="20" VerticalAlignment="Center" Height="40" IsReadOnly="False"></TextBox>
-            <Button Grid.Column="1" Click="Button_Click"  Background="Transparent" FontSize="25" BorderThickness="0" Width="30" VerticalAlignment="Center" HorizontalAlignment="Center" Content="▶" />
+            <TextBox Grid.Column="0" Name="messageTextbox" Grid.ColumnSpan="1"
+                     FontSize="20" VerticalAlignment="Center" Height="40" Style="{StaticResource messageTextbox}"></TextBox>
+            <Button Grid.Column="1" Command="{Binding SendCommand}" Background="Transparent" FontSize="25" BorderThickness="0" Width="30" VerticalAlignment="Center" HorizontalAlignment="Center" Content="▶" />
         </Grid>
 
     </Grid>

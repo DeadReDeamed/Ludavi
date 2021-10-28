@@ -34,6 +34,21 @@ namespace Ludavi_Client.ViewModels
 
         #endregion
 
+        #region define textBoxText
+
+        private string textBoxText { get; set; }
+        public string TextBoxText
+        {
+            get { return textBoxText; }
+            set
+            {
+                textBoxText = value;
+                OnPropertyChanged("TextBoxText");
+            }
+        }
+
+        #endregion
+
         #region define roomTopic
         private string roomTopic { get; set; }
         public string RoomTopic
@@ -108,6 +123,17 @@ namespace Ludavi_Client.ViewModels
                 if(selectedItem != null)
                     initRoom((Room)selectedItem);
             });
+
+            SendCommand = new RelayCommand((nothing) =>
+            {
+                if(TextBoxText != null)
+                    if (!String.IsNullOrEmpty(TextBoxText))
+                    {
+                        SendMessageToRoom(TextBoxText);
+                        TextBoxText = "";
+                    }
+                    
+            });
         }
 
         public async void SendMessageToRoom(string message)
@@ -140,6 +166,7 @@ namespace Ludavi_Client.ViewModels
             Messages = new ObservableCollectionEx<Message>(roomManager.GetMessagesFromRoom());
         }
 
+        public RelayCommand SendCommand { get; set; }
 
         private ICommand openLoginDialogCommand = null;
 

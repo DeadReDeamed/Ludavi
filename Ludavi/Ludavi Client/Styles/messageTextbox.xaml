@@ -19,8 +19,32 @@
                                      BorderThickness="0"
                                      Foreground="Black"
                                      CaretBrush="Black"
-                                     Margin="8,0,0,0">
+                                     Margin="8,0,0,0"
+                                     Text="{Binding TextBoxText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                                <TextBox.InputBindings>
+                                    <KeyBinding Key="Return" Command="{Binding SendCommand}"></KeyBinding>
+                                </TextBox.InputBindings>
                             </TextBox>
+
+                            <TextBlock IsHitTestVisible="False"
+                                       Text="message @here"
+                                       VerticalAlignment="Center"
+                                       HorizontalAlignment="Left"
+                                       Margin="10,0,0,0"
+                                       Foreground="Gray"
+                                       FontWeight="Medium">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Text, ElementName=messageTextbox}" Value="">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </DataTrigger>
+                                            
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
                         </Grid>
 
 

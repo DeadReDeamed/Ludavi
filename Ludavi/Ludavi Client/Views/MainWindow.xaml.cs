@@ -31,15 +31,6 @@ namespace Ludavi_Client
         {
             InitializeComponent();
         }
-
-        private void Button_Click(object sender, RoutedEventArgs e)
-        {
-            if(this.DataContext != null)
-            {
-                ((MainWindowViewModel)this.DataContext).SendMessageToRoom(messageTextBox.Text);
-                messageTextBox.Text = "";
-            }
-        }
        
 
         private void MainWindow_OnInitialized(object? sender, EventArgs e)
