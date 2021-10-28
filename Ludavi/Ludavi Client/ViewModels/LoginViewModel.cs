@@ -97,6 +97,11 @@ namespace Ludavi_Client.ViewModels
                 ErrorText = "please enter both a username and password";
                 return;
             }
+            if (UserName.Contains(":"))
+            {
+                ErrorText = "please use a proper username";
+                return;
+            }
 
             Window dialog = parameter as Window;
 
@@ -132,6 +137,11 @@ namespace Ludavi_Client.ViewModels
             if (String.IsNullOrEmpty(UserName) || String.IsNullOrEmpty(Password))
             {
                 ErrorText = "please enter both a username and password";
+                return;
+            }
+            if (UserName.Contains(":"))
+            {
+                ErrorText = "please use a proper username";
                 return;
             }
 

@@ -111,7 +111,8 @@ namespace Server
                     currentRoom = r;
                 }
             }
-            ((MessageList)roomsAndMessages[currentRoom]).list.Add(new Message(clients[Guid.Parse( data[(int)TCPHandler.StringIndex.ID] )].User.Name, DateTime.Now, data[(int)TCPHandler.StringIndex.MESSAGE])); ;
+            string[] messageValues = data[(int)TCPHandler.StringIndex.MESSAGE].Split(':', 2);
+            ((MessageList)roomsAndMessages[currentRoom]).list.Add(new Message(messageValues[0] + "#" + data[(int)TCPHandler.StringIndex.ID].Substring(0, 4), DateTime.Now, messageValues[1])); ;
             SendMessageToAllUsers(data);
         }
 

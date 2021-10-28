@@ -40,7 +40,8 @@ namespace Ludavi_Client.ViewModels
         private void handleChatData(string[] data)
         {
             RoomManager roomManager = MainWindowViewModel.roomManager;
-            Message message = new Message(data[(int)TCPHandler.StringIndex.ID], DateTime.Now, data[(int)TCPHandler.StringIndex.MESSAGE]);
+            string[] messageValues = data[(int)TCPHandler.StringIndex.MESSAGE].Split(':', 2);
+            Message message = new Message(messageValues[0] + "#" + data[(int)TCPHandler.StringIndex.ID].Substring(0,4), DateTime.Now, messageValues[1]);
             roomManager.AddMessageToRoom(uint.Parse(data[(int)TCPHandler.StringIndex.ROOMID]), message);
             if (uint.Parse(data[(int)TCPHandler.StringIndex.ROOMID]) == roomManager.currentRoom.RoomID) {
                 MainWindowViewModel.Messages.Add(message);

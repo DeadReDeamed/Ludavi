@@ -19,6 +19,21 @@ namespace Ludavi_Client.ViewModels
     public class MainWindowViewModel : INotifyPropertyChanged, IDisposable
     {
 
+        #region define windowName
+
+        private string windowName { get; set; }
+        public string WindowName
+        {
+            get { return windowName; }
+            set
+            {
+                windowName = value;
+                OnPropertyChanged("WindowName");
+            }
+        }
+
+        #endregion
+
         #region define roomName
 
         private string roomName { get; set; }
@@ -106,13 +121,15 @@ namespace Ludavi_Client.ViewModels
         #endregion
 
         private static TCPHandler tcpHandler;
-        public static Guid ID { get; private set; }
+        public static User user { get; private set; }
         public RoomManager roomManager { get; set; }
         private TcpClient client;
         private NetworkManager network;
         
         public MainWindowViewModel()
         {
+            WindowName = "Ludavi";
+
             this.openRoomDialogCommand = new RelayCommand(OnOpenRoomDialog);
             this.openLoginDialogCommand = new RelayCommand(OnOpenLoginDialog);
 
@@ -120,7 +137,7 @@ namespace Ludavi_Client.ViewModels
 
             OpenLoginDialogCommand.Execute("nothing");
 
-            roomManager = new RoomManager(tcpHandler, ID, this);
+            roomManager = new RoomManager(tcpHandler, user.UserId, this);
             roomsCollection = new ();
 
             roomManager.rooms.ForEach(room => RoomsCollection.Add(room));
@@ -155,7 +172,7 @@ namespace Ludavi_Client.ViewModels
 
         public async void SendMessageToRoom(string message)
         {
-            await tcpHandler.SendMessage(ID, roomManager.currentRoom.RoomID.ToString(), TCPHandler.MessageTypes.CHAT, message);
+            await tcpHandler.SendMessage(user.UserId, roomManager.currentRoom.RoomID.ToString(), TCPHandler.MessageTypes.CHAT, user.Name + ":" + message);
         }
 
         public void connectToServer()
@@ -166,19 +183,20 @@ namespace Ludavi_Client.ViewModels
             //Console.WriteLine("dawdad");
         }
 
-        private Guid OpenLoginDialog()
+        private User OpenLoginDialog()
         {
             loginWindow loginDialog = new loginWindow(tcpHandler);
             loginDialog.ShowDialog();
             LoginViewModel loginDialogContext = (LoginViewModel)(loginDialog.DataContext);
-            Guid result = loginDialogContext.Id;
+            User result = new User(loginDialogContext.UserName, loginDialogContext.Id);
             return result;
         }
 
 
         private async void OnOpenLoginDialog(object paramater)
         {
-            ID = OpenLoginDialog();
+            user = OpenLoginDialog();
+            WindowName += $" - {user.Name}";
         }
 
         public async void initRoom(Room room)
@@ -222,7 +240,7 @@ namespace Ludavi_Client.ViewModels
             roomDialog.ShowDialog();
             AddRoomViewModel roomDialogContext = (AddRoomViewModel)(roomDialog.DataContext);
             Room result = roomDialogContext.RoomResult;
-            tcpHandler.SendMessage(ID, "", TCPHandler.MessageTypes.ROOM, "ADDROOM " + JsonConvert.SerializeObject(result));
+            tcpHandler.SendMessage(user.UserId, "", TCPHandler.MessageTypes.ROOM, "ADDROOM " + JsonConvert.SerializeObject(result));
             return result;
         }
 
