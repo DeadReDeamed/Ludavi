@@ -14,7 +14,7 @@ namespace TCPHandlerNameSpace
         {
             this.stream = stream;
         }
-        public async Task<Task> SendMessage(uint id, string roomID, MessageTypes type, string message)
+        public async Task<Task> SendMessage(Guid id, string roomID, MessageTypes type, string message)
         {
             string dataString = $"{id} {roomID} {(int)type} {message}";
             byte[] length = BitConverter.GetBytes(dataString.Length);
@@ -67,7 +67,8 @@ namespace TCPHandlerNameSpace
             DATA = 2,
             STATUS = 3,
             LOGIN = 4,
-            ROOM = 5
+            ROOM = 5,
+            REGISTER = 6
         }
 
         public enum StringIndex

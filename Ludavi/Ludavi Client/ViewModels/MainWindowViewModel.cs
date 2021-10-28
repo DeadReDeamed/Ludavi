@@ -106,7 +106,7 @@ namespace Ludavi_Client.ViewModels
         #endregion
 
         private static TCPHandler tcpHandler;
-        public static uint ID { get; private set; }
+        public static Guid ID { get; private set; }
         public RoomManager roomManager { get; set; }
         private TcpClient client;
         private NetworkManager network;
@@ -115,9 +115,11 @@ namespace Ludavi_Client.ViewModels
         {
             this.openRoomDialogCommand = new RelayCommand(OnOpenRoomDialog);
             this.openLoginDialogCommand = new RelayCommand(OnOpenLoginDialog);
-            
-            
+
             connectToServer();
+
+            OpenLoginDialogCommand.Execute("nothing");
+
             roomManager = new RoomManager(tcpHandler, ID, this);
             roomsCollection = new ();
 
@@ -156,21 +158,27 @@ namespace Ludavi_Client.ViewModels
             await tcpHandler.SendMessage(ID, roomManager.currentRoom.RoomID.ToString(), TCPHandler.MessageTypes.CHAT, message);
         }
 
-        public async void connectToServer()
+        public void connectToServer()
         {
             client = new TcpClient();
             client.Connect("localhost", 80);
             tcpHandler = new TCPHandler(client.GetStream());
-            tcpHandler.SendMessage(0, "", TCPHandler.MessageTypes.LOGIN, "Luca Password");
-            string[] message = tcpHandler.ReadMessage();
-            Console.WriteLine(message[((int)TCPHandler.StringIndex.MESSAGE)]);
-            ID = uint.Parse(message[((int)TCPHandler.StringIndex.ID)]);
+            //Console.WriteLine("dawdad");
         }
 
-        private void OnOpenLoginDialog(object paramater)
+        private Guid OpenLoginDialog()
         {
-            loginWindow loginDialog = new loginWindow();
+            loginWindow loginDialog = new loginWindow(tcpHandler);
             loginDialog.ShowDialog();
+            LoginViewModel loginDialogContext = (LoginViewModel)(loginDialog.DataContext);
+            Guid result = loginDialogContext.Id;
+            return result;
+        }
+
+
+        private async void OnOpenLoginDialog(object paramater)
+        {
+            ID = OpenLoginDialog();
         }
 
         public async void initRoom(Room room)
@@ -231,6 +239,8 @@ namespace Ludavi_Client.ViewModels
         }
 
         #endregion
+
+       
 
         public RelayCommand SelectedItemChangedCommand { get; set; }
 

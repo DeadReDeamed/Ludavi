@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using Ludavi_Client.Annotations;
+using TCPHandlerNameSpace;
 
 namespace Ludavi_Client.ViewModels
 {
@@ -16,6 +17,8 @@ namespace Ludavi_Client.ViewModels
     {
 
         public string windowTitle => "login";
+
+        public TCPHandler TcpHandler;
 
         #region define userName
 
@@ -32,7 +35,7 @@ namespace Ludavi_Client.ViewModels
 
         #endregion
 
-        #region define userName
+        #region define errorText
 
         private string errorText { get; set; }
         public string ErrorText
@@ -53,8 +56,26 @@ namespace Ludavi_Client.ViewModels
 
         #endregion
 
-        public LoginViewModel()
+        #region define ID
+
+        private Guid id { get; set; }
+        public Guid Id
         {
+            get { return id; }
+            set
+            {
+                id = value;
+                OnPropertyChanged("Id");
+            }
+        }
+
+        #endregion
+
+        public string Type { get; set; }
+
+        public LoginViewModel(TCPHandler tcpHandler)
+        {
+            TcpHandler = tcpHandler;
             this.loginCommand = new RelayCommand(LoginClicked);
             this.registerCommand = new RelayCommand(RegisterClicked);
         }
@@ -68,8 +89,9 @@ namespace Ludavi_Client.ViewModels
             set { registerCommand = value; }
         }
 
-        private void RegisterClicked(object parameter)
+        private async void RegisterClicked(object parameter)
         {
+            Type = "REGISTER";
             if (String.IsNullOrEmpty(UserName) || String.IsNullOrEmpty(Password))
             {
                 ErrorText = "please enter both a username and password";
@@ -78,11 +100,18 @@ namespace Ludavi_Client.ViewModels
 
             Window dialog = parameter as Window;
 
-            var id = GuidFromString(UserName + ":" + Password);
+           Id = GuidFromString(UserName + ":" + Password);
 
-            //send details to server.
-            //only continue if server tells you the 
-            dialog.DialogResult = true;
+            await TcpHandler.SendMessage(Guid.Empty, "", TCPHandler.MessageTypes.REGISTER, $"{Id} {UserName}");
+            string[] message = TcpHandler.ReadMessage();
+            Console.WriteLine(message[((int)TCPHandler.StringIndex.MESSAGE)]);
+            ErrorText = message[((int)TCPHandler.StringIndex.MESSAGE)];
+
+            if (message[((int)TCPHandler.StringIndex.MESSAGE)] == "ok") dialog.DialogResult = true;
+            else ErrorText = message[((int)TCPHandler.StringIndex.MESSAGE)];
+
+            if (false)
+                dialog.DialogResult = true;
         }
 
         #endregion
@@ -96,8 +125,9 @@ namespace Ludavi_Client.ViewModels
             set { loginCommand = value; }
         }
 
-        private void LoginClicked(object parameter)
+        private async void LoginClicked(object parameter)
         {
+            Type = "LOGIN";
             //return if any field is empty
             if (String.IsNullOrEmpty(UserName) || String.IsNullOrEmpty(Password))
             {
@@ -107,16 +137,16 @@ namespace Ludavi_Client.ViewModels
 
             Window dialog = parameter as Window;
 
-            var id = GuidFromString(UserName + ":" + Password);
+            Id = GuidFromString(UserName + ":" + Password);
 
             //check if server knows id
-            if (UserName.Equals("test") && Password.Equals("test"))
-            {
-                dialog.DialogResult = true;
-            }
-            else ErrorText = "username or password is incorrect";
+            await TcpHandler.SendMessage(Guid.Empty, "", TCPHandler.MessageTypes.LOGIN, $"{Id} {UserName}");
+            string[] message = TcpHandler.ReadMessage();
             
-            
+            if (message[((int)TCPHandler.StringIndex.MESSAGE)] == "ok") dialog.DialogResult = true;
+            else ErrorText = message[((int)TCPHandler.StringIndex.MESSAGE)];
+
+
         }
 
         #endregion

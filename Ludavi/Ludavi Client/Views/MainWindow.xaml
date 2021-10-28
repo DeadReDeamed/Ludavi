@@ -8,7 +8,6 @@
         xmlns:viewModels="clr-namespace:Ludavi_Client.ViewModels"
         xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
         mc:Ignorable="d"
-        Initialized="MainWindow_OnInitialized"
         Title="Ludavi" Height="450" Width="800">
 
 

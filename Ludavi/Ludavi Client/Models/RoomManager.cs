@@ -17,11 +17,11 @@ namespace Ludavi_Client.Models
         public Room currentRoom { get; private set; }
         public List<Room> rooms { get; private set; }
         public Dictionary<Room, List<Message>> roomsAndMessages;
-        private uint userID;
+        private Guid userID;
         private TCPHandler handler;
         private MainWindowViewModel mainWindow;
         private int indexOfCurrentRoom;
-        public RoomManager(TCPHandler handler, uint userID, MainWindowViewModel mainWindow)
+        public RoomManager(TCPHandler handler, Guid userID, MainWindowViewModel mainWindow)
         {
             this.userID = userID;
             rooms = new List<Room>();

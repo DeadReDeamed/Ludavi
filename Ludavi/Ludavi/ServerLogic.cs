@@ -12,7 +12,7 @@ namespace Server
 {
     public class ServerLogic : IDisposable
     {
-        private static Dictionary<uint, ServerClient> clients;
+        private static Dictionary<Guid, ServerClient> clients;
         private static TcpListener tcpListener;
         private static TCPHandler tcpHandler;
         private static List<Room> rooms;
@@ -29,7 +29,7 @@ namespace Server
         public static void RunServer()
         {
             roomsAndMessages = new Dictionary<Room, ServerList>();
-            clients = new Dictionary<uint, ServerClient>();
+            clients = new Dictionary<Guid, ServerClient>();
             functions = new Dictionary<TCPHandler.MessageTypes, Action<string[]>>();
             functions.Add(TCPHandler.MessageTypes.CHAT, SendChatToAllUsers);
             functions.Add(TCPHandler.MessageTypes.ROOM, HandleRoomManagement);
@@ -47,22 +47,59 @@ namespace Server
         {
             var tcpClient = tcpListener.EndAcceptTcpClient(ar);
             tcpHandler = new TCPHandler(tcpClient.GetStream());
-            Console.WriteLine($"Added: {tcpClient.Client.RemoteEndPoint} to server");
+            //Console.WriteLine($"Added: {tcpClient.Client.RemoteEndPoint} to server");
             string[] dataString = tcpHandler.ReadMessage();
 
-            if (dataString[((int)TCPHandler.StringIndex.ID)] == "0") {
-                uint randomId = (uint)(new Random().Next(1, int.MaxValue));
-                while (clients.ContainsKey(randomId))
-                {
-                    randomId = (uint)(new Random().Next(1, int.MaxValue));
-                }
+            int type = int.Parse(dataString[(int)TCPHandler.StringIndex.TYPE]);
+            bool result = type switch
+            {
+                (int)TCPHandler.MessageTypes.REGISTER => await HandleRegisterRequest(dataString, tcpClient),
+                (int)TCPHandler.MessageTypes.LOGIN => await HandleLoginRequest(dataString),
+                _ => throw new Exception("Login request was not recognized")
+            };
 
-                string[] usernameAndPassword = dataString[((int)TCPHandler.StringIndex.MESSAGE)].Split(" ");
-                clients.Add(randomId, new ServerClient(randomId, usernameAndPassword[0], usernameAndPassword[1], tcpClient, tcpHandler));
-                Console.WriteLine(dataString[((int)TCPHandler.StringIndex.MESSAGE)]);
-                await clients[randomId].handler.SendMessage(randomId, "", TCPHandler.MessageTypes.LOGIN, $"Logged in, your id is: {randomId}");
-            }
+            if (!result) connectClientsToServer(ar);
+
             tcpListener.BeginAcceptTcpClient(new AsyncCallback(connectClientsToServer), null);
+        }
+
+
+        public static async Task<bool> HandleRegisterRequest(string[] dataString, TcpClient tcpClient)
+        {
+            string[] userValues = dataString[((int)TCPHandler.StringIndex.MESSAGE)].Split(' ', 2);
+            Guid id = Guid.Parse(userValues[0]);
+            string name = userValues[1];
+            if (!clients.ContainsKey(id))
+            {
+                ServerClient newClient = new ServerClient(new User(name, id), tcpClient, tcpHandler);
+                clients.Add(id, newClient);
+                Console.WriteLine(clients[id].User.Name + " has joined Ludavi!");
+                await clients[id].Handler.SendMessage(Guid.Empty, "", TCPHandler.MessageTypes.REGISTER, $"ok");
+                return true;
+            }
+            else
+            {
+                Console.WriteLine(clients[id].User.Name + " has tried to register a taken login, what a dummy :)");
+                await clients[id].Handler.SendMessage(Guid.Empty, "", TCPHandler.MessageTypes.REGISTER, $"already registered!");
+                return false;
+            }
+        }
+
+        public static async Task<bool> HandleLoginRequest(string[] dataString)
+        {
+            string[] userValues = dataString[((int)TCPHandler.StringIndex.MESSAGE)].Split(' ', 2);
+            Guid id = Guid.Parse(userValues[0]);
+            string name = userValues[1];
+            if (clients.ContainsKey(id) && !clients[id].Connected)
+            {
+                Console.WriteLine(clients[id].User.Name + " has logged in!");
+                await clients[id].Handler.SendMessage(Guid.Empty, "", TCPHandler.MessageTypes.LOGIN, $"ok");
+                return true;
+            }
+            else {
+                await tcpHandler.SendMessage(Guid.Empty, "", TCPHandler.MessageTypes.LOGIN, $"login failed!");
+                return false;
+            }
         }
 
         public static async void SendChatToAllUsers(string[] data)
@@ -74,7 +111,7 @@ namespace Server
                     currentRoom = r;
                 }
             }
-            ((MessageList)roomsAndMessages[currentRoom]).list.Add(new Message(data[(int)TCPHandler.StringIndex.ID], DateTime.Now, data[(int)TCPHandler.StringIndex.MESSAGE]));
+            ((MessageList)roomsAndMessages[currentRoom]).list.Add(new Message(clients[Guid.Parse( data[(int)TCPHandler.StringIndex.ID] )].User.Name, DateTime.Now, data[(int)TCPHandler.StringIndex.MESSAGE])); ;
             SendMessageToAllUsers(data);
         }
 
@@ -82,22 +119,22 @@ namespace Server
         {
             sendToAll<Task> send = tcpHandler.SendMessage;
             send -= tcpHandler.SendMessage;
-            foreach(KeyValuePair<uint,ServerClient> key in clients)
+            foreach(KeyValuePair<Guid, ServerClient> key in clients)
             {
-                send += clients[key.Key].handler.SendMessage;
+                send += clients[key.Key].Handler.SendMessage;
             }
             await send.Invoke(data);
         } 
         
         public static async void HandleRoomManagement(string[] data)
         {
-            Console.WriteLine(data[(int)TCPHandler.StringIndex.MESSAGE]);
+            //Console.WriteLine(data[(int)TCPHandler.StringIndex.MESSAGE]);
             string message = data[(int)TCPHandler.StringIndex.MESSAGE];
             var messageSplit = message.Split(" ", 2);
             switch (messageSplit[0])
             {
                 case "GETROOMS":
-                    await clients[uint.Parse(data[(int)TCPHandler.StringIndex.ID])].handler.SendMessage(uint.Parse(data[(int)TCPHandler.StringIndex.ID]), "", TCPHandler.MessageTypes.ROOM, "RETURNROOMS " + "ROOMS " + JsonConvert.SerializeObject(rooms));
+                    await clients[Guid.Parse(data[(int)TCPHandler.StringIndex.ID])].Handler.SendMessage(Guid.Parse(data[(int)TCPHandler.StringIndex.ID]), "", TCPHandler.MessageTypes.ROOM, "RETURNROOMS " + "ROOMS " + JsonConvert.SerializeObject(rooms));
                     List<List<Message>> messagesPerList = new List<List<Message>>();
                     List<List<User>> usersPerList = new List<List<User>>();
                     foreach(KeyValuePair<Room, ServerList> key in roomsAndMessages){
@@ -106,7 +143,7 @@ namespace Server
                             messagesPerList.Add(((MessageList)key.Value).list);
                         } 
                     }
-                    await clients[uint.Parse(data[(int)TCPHandler.StringIndex.ID])].handler.SendMessage(uint.Parse(data[(int)TCPHandler.StringIndex.ID]), "", TCPHandler.MessageTypes.ROOM, "RETURNROOMS " + "MESSAGES " + JsonConvert.SerializeObject(messagesPerList));
+                    await clients[Guid.Parse(data[(int)TCPHandler.StringIndex.ID])].Handler.SendMessage(Guid.Parse(data[(int)TCPHandler.StringIndex.ID]), "", TCPHandler.MessageTypes.ROOM, "RETURNROOMS " + "MESSAGES " + JsonConvert.SerializeObject(messagesPerList));
                    
                     break;
                 case "ADDROOM":
@@ -131,7 +168,7 @@ namespace Server
                     {
                         if(key.Key.RoomID == uint.Parse(messageSplit[1]))
                         {
-                            await clients[uint.Parse(data[(int)TCPHandler.StringIndex.ID])].handler.SendMessage(uint.Parse(data[(int)TCPHandler.StringIndex.ID]), "", TCPHandler.MessageTypes.ROOM, "RETURNUSERS " + JsonConvert.SerializeObject(((VoiceList)key.Value).list));
+                            await clients[Guid.Parse(data[(int)TCPHandler.StringIndex.ID])].Handler.SendMessage(Guid.Parse(data[(int)TCPHandler.StringIndex.ID]), "", TCPHandler.MessageTypes.ROOM, "RETURNUSERS " + JsonConvert.SerializeObject(((VoiceList)key.Value).list));
                             break;
 
                         }
@@ -142,10 +179,10 @@ namespace Server
 
         public void Dispose()
         {
-            foreach(KeyValuePair<uint, ServerClient> c in clients)
+            foreach(KeyValuePair<Guid, ServerClient> c in clients)
             {
-                c.Value.connected = false;
-                c.Value.client.GetStream().Close();
+                c.Value.Connected = false;
+                c.Value.Client.GetStream().Close();
             }
         }
     }

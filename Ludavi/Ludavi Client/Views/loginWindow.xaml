@@ -11,9 +11,7 @@
       WindowStartupLocation="CenterOwner"
       Title="{Binding windowTitle}" Height="200" Width="430">
 
-    <Window.DataContext>
-        <viewModels:LoginViewModel/>
-    </Window.DataContext>
+
 
     <Grid>
 

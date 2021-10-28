@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Ludavi_Client.ViewModels;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,6 +13,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using TCPHandlerNameSpace;
 
 namespace Ludavi_Client.Views
 {
@@ -20,8 +22,9 @@ namespace Ludavi_Client.Views
     /// </summary>
     public partial class loginWindow : Window
     {
-        public loginWindow()
+        public loginWindow(TCPHandler tcpHandler)
         {
+            this.DataContext = new LoginViewModel(tcpHandler);
             InitializeComponent();
         }
 

@@ -6,33 +6,30 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using TCPHandlerNameSpace;
+using TCPHandlerNameSpace.Models;
 
 namespace Server
 {
     public class ServerClient
     {
-        public string UserName { get; private set; }
-        public string Password { get; private set; }
-        public uint ID { get; set; }
-        public TCPHandler handler { get; set; }
-        public TcpClient client { get; set; }
-        public bool connected { get; set; }
-        public ServerClient(uint ID, string UserName, string Password, TcpClient client, TCPHandler handler)
+        public User User { get; set; }
+        public TCPHandler Handler { get; set; }
+        public TcpClient Client { get; set; }
+        public bool Connected { get; set; }
+        public ServerClient(User user, TcpClient client, TCPHandler handler)
         {
-            this.UserName = UserName;
-            this.Password = Password;
-            this.handler = handler;
-            this.ID = ID;
-            this.client = client;
-            connected = true;
+            this.User = user;
+            this.Handler = handler;
+            this.Client = client;
+            Connected = true;
             new Thread(async () => { startListening(); }).Start();
         }
 
         public async void startListening()
         {
-            while (connected)
+            while (Connected)
             {
-                string[] data = handler.ReadMessage();
+                string[] data = Handler.ReadMessage();
 
                 try
                 {
