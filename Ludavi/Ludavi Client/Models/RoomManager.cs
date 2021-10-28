@@ -18,11 +18,21 @@ namespace Ludavi_Client.Models
         public List<Room> rooms { get; private set; }
         public Dictionary<Room, List<Message>> roomsAndMessages;
         private uint userID;
+        private TCPHandler handler;
+        private MainWindowViewModel mainWindow;
         public RoomManager(TCPHandler handler, uint userID, MainWindowViewModel mainWindow)
         {
             this.userID = userID;
             rooms = new List<Room>();
-          
+            this.handler = handler;
+            this.mainWindow = mainWindow;
+            UpdatRooms();
+
+        }
+
+        public void UpdatRooms()
+        {
+            rooms.Clear();
             handler.SendMessage(userID, "server", TCPHandler.MessageTypes.ROOM, "GETROOMS");
             string[] message = handler.ReadMessage();
             string fullMessage = "";
@@ -43,13 +53,16 @@ namespace Ludavi_Client.Models
             List<List<Message>> messagesList = JsonConvert.DeserializeObject<List<List<Message>>>(fullMessage);
 
             roomsAndMessages = new Dictionary<Room, List<Message>>();
-            for(int i = 0; i < rooms.Count; i++)
+            for (int i = 0; i < rooms.Count; i++)
             {
                 roomsAndMessages.Add(rooms[i], messagesList[i]);
             }
-            currentRoom = rooms[0];
+            
+            if (currentRoom == null)
+            {
+                currentRoom = rooms[0];
+            }
             mainWindow.Messages = new ObservableCollectionEx<Message>(roomsAndMessages[currentRoom]);
-
         }
 
         public void SelectRoom(uint roomID)

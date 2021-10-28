@@ -50,7 +50,7 @@ namespace Ludavi_Client.ViewModels
         {
             if (data[(int)TCPHandler.StringIndex.MESSAGE] == "UPDATEROOMS")
             {
-                MainWindowViewModel.roomManager = new Models.RoomManager(handler, MainWindowViewModel.ID, this.MainWindowViewModel);
+                MainWindowViewModel.roomManager.UpdatRooms();
 
                 Application.Current.Dispatcher.BeginInvoke(new Action(() =>
                 {
