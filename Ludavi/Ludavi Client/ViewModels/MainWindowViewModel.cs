@@ -16,7 +16,7 @@ using TCPHandlerNameSpace.Models;
 
 namespace Ludavi_Client.ViewModels
 {
-    public class MainWindowViewModel : INotifyPropertyChanged
+    public class MainWindowViewModel : INotifyPropertyChanged, IDisposable
     {
 
         #region define roomName
@@ -79,6 +79,7 @@ namespace Ludavi_Client.ViewModels
         public static uint ID { get; private set; }
         public RoomManager roomManager { get; set; }
         private TcpClient client;
+        private NetworkManager network;
         
         public MainWindowViewModel()
         {
@@ -92,7 +93,7 @@ namespace Ludavi_Client.ViewModels
 
             roomManager.rooms.ForEach(room => RoomsCollection.Add(room));
 
-            NetworkManager network = new NetworkManager(tcpHandler, this);
+            network = new NetworkManager(tcpHandler, this);
 
             roomName = "Welcome";
             roomTopic = "please select or add a room to start communicating!";
@@ -135,6 +136,8 @@ namespace Ludavi_Client.ViewModels
         {
             RoomName = room.Name;
             RoomTopic = room.Topic;
+            roomManager.SelectRoom(room.RoomID);
+            Messages = new ObservableCollectionEx<Message>(roomManager.GetMessagesFromRoom());
         }
 
 
@@ -188,6 +191,10 @@ namespace Ludavi_Client.ViewModels
             this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(property));
         }
 
-
+        public void Dispose()
+        {
+            this.network.Connected = false;
+            this.client.GetStream().Close();
+        }
     }
 }

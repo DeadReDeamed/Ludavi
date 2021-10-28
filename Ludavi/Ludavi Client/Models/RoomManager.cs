@@ -52,11 +52,11 @@ namespace Ludavi_Client.Models
 
         }
 
-        public void SelectRoom(uint roomNumber)
+        public void SelectRoom(uint roomID)
         {
             foreach(Room room in rooms)
             {
-                if(room.RoomID == roomNumber)
+                if(room.RoomID == roomID)
                 {
                     currentRoom = room;
                     break;
@@ -76,12 +76,12 @@ namespace Ludavi_Client.Models
             }
         }
 
-        public List<Message> GetMessagesFromRoom(uint roomID)
+        public List<Message> GetMessagesFromRoom()
         {
             List<Message> messagesFromRoom = new List<Message>();
             foreach (KeyValuePair<Room, List<Message>> key in roomsAndMessages)
             {
-                if (key.Key.RoomID == roomID)
+                if (key.Key.RoomID == currentRoom.RoomID)
                 {
                     messagesFromRoom = key.Value;
                 }

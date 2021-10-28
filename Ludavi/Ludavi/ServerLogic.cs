@@ -10,7 +10,7 @@ using TCPHandlerNameSpace.Models;
 
 namespace Server
 {
-    public class ServerLogic
+    public class ServerLogic : IDisposable
     {
         private static Dictionary<uint, ServerClient> clients;
         private static TcpListener tcpListener;
@@ -114,5 +114,16 @@ namespace Server
                     break;
             }
         }
+
+        public void Dispose()
+        {
+            foreach(KeyValuePair<uint, ServerClient> c in clients)
+            {
+                c.Value.connected = false;
+                c.Value.client.GetStream().Close();
+            }
+        }
     }
+
+
 }
