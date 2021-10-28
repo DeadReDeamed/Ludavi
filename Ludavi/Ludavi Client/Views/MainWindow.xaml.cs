@@ -27,7 +27,6 @@ namespace Ludavi_Client
     /// </summary>
     public partial class MainWindow : Window
     {
-        
         public MainWindow()
         {
             InitializeComponent();
@@ -51,5 +50,6 @@ namespace Ludavi_Client
                 vm.OpenLoginDialogCommand.Execute("nothing");
             }
         }
+
     }
 }

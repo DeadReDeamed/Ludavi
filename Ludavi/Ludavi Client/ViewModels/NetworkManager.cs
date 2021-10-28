@@ -36,7 +36,7 @@ namespace Ludavi_Client.ViewModels
 
         private void handleChatData(string[] data)
         {
-            
+            MainWindowViewModel.Messages.Add(new TCPHandlerNameSpace.Models.Message(data[(int)TCPHandler.StringIndex.ID], DateTime.Now, data[(int)TCPHandler.StringIndex.MESSAGE]));
         }
 
         private void handleRoomData(string[] data)

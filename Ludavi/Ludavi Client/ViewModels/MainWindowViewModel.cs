@@ -78,13 +78,12 @@ namespace Ludavi_Client.ViewModels
         public static uint ID { get; private set; }
         public RoomManager roomManager { get; set; }
         private TcpClient client;
-        private MainWindow mainWindow;
 
-        public MainWindowViewModel(MainWindow mainWindow)
+        public MainWindowViewModel()
         {
             this.openRoomDialogCommand = new RelayCommand(OnOpenRoomDialog);
             this.openLoginDialogCommand = new RelayCommand(OnOpenLoginDialog);
-            this.mainWindow = mainWindow;
+            
             
             connectToServer();
             roomManager = new RoomManager(tcpHandler, ID);
