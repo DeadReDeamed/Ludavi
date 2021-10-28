@@ -32,6 +32,7 @@ namespace Ludavi_Client.Models
 
         public async void UpdatRooms()
         {
+            int indexOfCurrentRoom = rooms.IndexOf(currentRoom);
             rooms.Clear();
             handler.SendMessage(userID, "server", TCPHandler.MessageTypes.ROOM, "GETROOMS");
             string[] message = await handler.ReadMessage();
@@ -53,16 +54,37 @@ namespace Ludavi_Client.Models
             List<List<Message>> messagesList = JsonConvert.DeserializeObject<List<List<Message>>>(fullMessage);
 
             roomsAndMessages = new Dictionary<Room, List<Message>>();
+            int messageListInt = 0;
             for (int i = 0; i < rooms.Count; i++)
             {
-                roomsAndMessages.Add(rooms[i], messagesList[i]);
+                if (rooms[i].Type == (int)RoomType.Text)
+                {
+                    roomsAndMessages.Add(rooms[i], messagesList[messageListInt]);
+                    messageListInt++;
+                }
             }
             
             if (currentRoom == null)
             {
                 currentRoom = rooms[0];
+            } else
+            {
+                currentRoom = rooms[indexOfCurrentRoom];
             }
             mainWindow.Messages = new ObservableCollectionEx<Message>(roomsAndMessages[currentRoom]);
+        }
+
+        public async Task<List<User>> GetVoiceUsers()
+        {
+            handler.SendMessage(userID, "server", TCPHandler.MessageTypes.ROOM, "GETUSERSFROMROOM " + currentRoom.RoomID);
+            string[] message = await handler.ReadMessage();
+            string fullMessage = "";
+            for (int i = (int)TCPHandler.StringIndex.MESSAGE; i < message.Length; i++)
+            {
+                fullMessage += message[i] + " ";
+            }
+            fullMessage = fullMessage.Trim();
+            return JsonConvert.DeserializeObject<List<User>>(fullMessage);
         }
 
         public void SelectRoom(uint roomID)

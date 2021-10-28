@@ -76,6 +76,21 @@ namespace Ludavi_Client.ViewModels
 
         #endregion
 
+        #region define VoiceUsers
+
+        private ObservableCollectionEx<User> voiceUsers { get; set; }
+        public ObservableCollectionEx<User> VoiceUsers
+        {
+            get { return voiceUsers; }
+            set
+            {
+                voiceUsers = value;
+                OnPropertyChanged("VoiceUsers");
+            }
+        }
+
+        #endregion
+
         #region define Messages
         private ObservableCollectionEx<Message> messages { get; set; }
         public ObservableCollectionEx<Message> Messages
@@ -158,12 +173,19 @@ namespace Ludavi_Client.ViewModels
             loginDialog.ShowDialog();
         }
 
-        public void initRoom(Room room)
+        public async void initRoom(Room room)
         {
             RoomName = room.Name;
             RoomTopic = room.Topic;
-            roomManager.SelectRoom(room.RoomID);
-            Messages = new ObservableCollectionEx<Message>(roomManager.GetMessagesFromRoom());
+            if (room.Type == (int)RoomType.Text)
+            {
+                roomManager.SelectRoom(room.RoomID);
+                Messages = new ObservableCollectionEx<Message>(roomManager.GetMessagesFromRoom());
+            } else if(room.Type == (int)RoomType.Voice)
+            {
+                roomManager.SelectRoom(room.RoomID);
+                VoiceUsers = new ObservableCollectionEx<User>(await roomManager.GetVoiceUsers());
+            }
         }
 
         public RelayCommand SendCommand { get; set; }
