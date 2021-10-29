@@ -73,10 +73,10 @@ namespace Ludavi_Client.Models
                 mainWindow.Messages.Clear();
                 if (rooms[indexOfCurrentRoom].Type == (int)RoomType.Text)
                 {
-                    mainWindow.Messages = new ObservableCollectionEx<Message>(roomsAndMessages[currentRoom]);
+                    mainWindow.Messages = new ObservableCollectionEx<IRoomContent>(roomsAndMessages[currentRoom]);
                 } else
                 {
-                    mainWindow.Messages = new ObservableCollectionEx<Message>();
+                    mainWindow.Messages = new ObservableCollectionEx<IRoomContent>();
                 }
                 mainWindow.RoomsCollection.Clear();
                 mainWindow.RoomsCollection = new ObservableCollectionEx<Room>(rooms);

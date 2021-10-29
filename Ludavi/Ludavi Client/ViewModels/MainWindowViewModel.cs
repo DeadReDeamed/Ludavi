@@ -107,8 +107,8 @@ namespace Ludavi_Client.ViewModels
         #endregion
 
         #region define Messages
-        private ObservableCollectionEx<Message> messages { get; set; }
-        public ObservableCollectionEx<Message> Messages
+        private ObservableCollectionEx<IRoomContent> messages { get; set; }
+        public ObservableCollectionEx<IRoomContent> Messages
         {
             get { return messages; }
             set
@@ -148,7 +148,7 @@ namespace Ludavi_Client.ViewModels
             roomTopic = "please select or add a room to start communicating!";
             if(Messages == null)
             {
-                Messages = new ObservableCollectionEx<Message>();
+                Messages = new ObservableCollectionEx<IRoomContent>();
             }
             
 
@@ -206,7 +206,7 @@ namespace Ludavi_Client.ViewModels
             if (room.Type == (int)RoomType.Text)
             {
                 roomManager.SelectRoom(room.RoomID);
-                Messages = new ObservableCollectionEx<Message>(roomManager.GetMessagesFromRoom());
+                Messages = new ObservableCollectionEx<IRoomContent>(roomManager.GetMessagesFromRoom());
             } else if(room.Type == (int)RoomType.Voice)
             {
                 roomManager.SelectRoom(room.RoomID);
