@@ -4,7 +4,7 @@ using System.Text;
 
 namespace TCPHandlerNameSpace.Models
 {
-    public class Voice : IRoomContent
+    public class Voice
     {
         public Voice(string name)
         {

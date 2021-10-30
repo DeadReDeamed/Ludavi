@@ -73,24 +73,24 @@ namespace Ludavi_Client.Models
                 mainWindow.Messages.Clear();
                 if (rooms[indexOfCurrentRoom].Type == (int)RoomType.Text)
                 {
-                    mainWindow.Messages = new ObservableCollectionEx<IRoomContent>(roomsAndMessages[currentRoom]);
+                    mainWindow.Messages = new ObservableCollectionEx<Message>(roomsAndMessages[currentRoom]);
                 } else
                 {
-                    mainWindow.Messages = new ObservableCollectionEx<IRoomContent>();
+                    mainWindow.Messages = new ObservableCollectionEx<Message>();
                 }
                 mainWindow.RoomsCollection.Clear();
                 mainWindow.RoomsCollection = new ObservableCollectionEx<Room>(rooms);
             }
         }
 
-        public void UpdateRooms()
+        public async void UpdateRooms()
         {
-            handler.SendMessage(userID, "server", TCPHandler.MessageTypes.ROOM, "GETROOMS");
+            await handler.SendMessage(userID, "server", TCPHandler.MessageTypes.ROOM, "GETROOMS");
         }
 
-        public void GetVoiceUsers()
+        public async void GetVoiceUsers()
         {
-            handler.SendMessage(userID, "server", TCPHandler.MessageTypes.ROOM, "GETUSERSFROMROOM " + currentRoom.RoomID);
+            await handler.SendMessage(userID, "server", TCPHandler.MessageTypes.ROOM, "GETUSERSFROMROOM " + currentRoom.RoomID);
            
         }
 

@@ -19,6 +19,8 @@ namespace Server
         private delegate T sendToAll<T>(string[] data);
         public static Dictionary<TCPHandler.MessageTypes, Action<string[]>> functions;
         public static Dictionary<Room, ServerList> roomsAndMessages;
+        public static Dictionary<Room, List<UdpClient>> voiceRoomsWithUdp;
+        public static List<User> usersInServer;
 
         //public static void main(string[] args)
         //{
@@ -30,9 +32,12 @@ namespace Server
         {
             roomsAndMessages = new Dictionary<Room, ServerList>();
             clients = new Dictionary<Guid, ServerClient>();
+            voiceRoomsWithUdp = new Dictionary<Room, List<UdpClient>>();
             functions = new Dictionary<TCPHandler.MessageTypes, Action<string[]>>();
             functions.Add(TCPHandler.MessageTypes.CHAT, SendChatToAllUsers);
             functions.Add(TCPHandler.MessageTypes.ROOM, HandleRoomManagement);
+            functions.Add(TCPHandler.MessageTypes.VOICE, HandleVoiceData);
+            usersInServer = new List<User>();
             tcpListener = new TcpListener(System.Net.IPAddress.Any, 80);
             tcpListener.Start();
             rooms = new List<Room>();
@@ -48,7 +53,7 @@ namespace Server
             var tcpClient = tcpListener.EndAcceptTcpClient(ar);
             tcpHandler = new TCPHandler(tcpClient.GetStream());
             //Console.WriteLine($"Added: {tcpClient.Client.RemoteEndPoint} to server");
-            string[] dataString = tcpHandler.ReadMessage();
+            string[] dataString = await tcpHandler.ReadMessage();
 
             int type = int.Parse(dataString[(int)TCPHandler.StringIndex.TYPE]);
             bool result = type switch
@@ -75,6 +80,7 @@ namespace Server
                 clients.Add(id, newClient);
                 Console.WriteLine(clients[id].User.Name + " has joined Ludavi!");
                 await clients[id].Handler.SendMessage(Guid.Empty, "", TCPHandler.MessageTypes.REGISTER, $"ok");
+                usersInServer.Add(new User(name, id));
                 return true;
             }
             else
@@ -160,6 +166,7 @@ namespace Server
                         else if (newRoom.Type == (int)RoomType.Voice)
                         {
                             roomsAndMessages.Add(newRoom, new VoiceList(new List<User>()));
+                            voiceRoomsWithUdp.Add(newRoom, new List<UdpClient>());
                         }
                         SendMessageToAllUsers(stringdata);
                     }
@@ -175,6 +182,40 @@ namespace Server
                         }
                     }
                     break;
+            }
+            
+        }
+
+        public static async void HandleVoiceData(string[] data)
+        {
+            string message = data[(int)TCPHandler.StringIndex.MESSAGE];
+            Room currentRoom = null;
+            foreach (Room r in rooms)
+            {
+                if (r.RoomID == uint.Parse(data[(int)TCPHandler.StringIndex.ROOMID]))
+                {
+                    currentRoom = r;
+                    break;
+                }
+            }
+            User currentUser = null;
+            foreach (User u in usersInServer)
+            {
+                if (u.UserId == Guid.Parse(data[(int)TCPHandler.StringIndex.ID]))
+                {
+                    currentUser = u;
+                    break;
+                }
+            }
+            if (message == "JOIN" && currentRoom != null && currentUser != null)
+            {
+                
+                ((VoiceList)roomsAndMessages[currentRoom]).list.Add(currentUser);
+                await clients[Guid.Parse(data[(int)TCPHandler.StringIndex.ID])].Handler.SendMessage(Guid.Parse(data[(int)TCPHandler.StringIndex.ID]), data[(int)TCPHandler.StringIndex.ROOMID], TCPHandler.MessageTypes.VOICE, "OK");
+            } else if(message == "LEAVE" && currentRoom != null && currentUser != null)
+            {
+                ((VoiceList)roomsAndMessages[currentRoom]).list.Remove(currentUser);
+                await clients[Guid.Parse(data[(int)TCPHandler.StringIndex.ID])].Handler.SendMessage(Guid.Parse(data[(int)TCPHandler.StringIndex.ID]), data[(int)TCPHandler.StringIndex.ROOMID], TCPHandler.MessageTypes.VOICE, "OK");
             }
         }
 

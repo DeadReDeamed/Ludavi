@@ -107,8 +107,8 @@ namespace Ludavi_Client.ViewModels
         #endregion
 
         #region define Messages
-        private ObservableCollectionEx<IRoomContent> messages { get; set; }
-        public ObservableCollectionEx<IRoomContent> Messages
+        private ObservableCollectionEx<Message> messages { get; set; }
+        public ObservableCollectionEx<Message> Messages
         {
             get { return messages; }
             set
@@ -125,15 +125,25 @@ namespace Ludavi_Client.ViewModels
         public RoomManager roomManager { get; set; }
         private TcpClient client;
         private NetworkManager network;
-        
+        public Visibility Chat { get { return _chat; } set { _chat = value; OnPropertyChanged("Chat"); } }
+        private Visibility _chat;
+        public Visibility Voice { get { return _voice; } set { _voice = value; OnPropertyChanged("Voice"); } }
+        private Visibility _voice;
+        private string joinButtonText { get; set; }
+        public string JoinButtonText { get { return joinButtonText; } set { joinButtonText = value; OnPropertyChanged("JoinButtonText"); } }
+        public bool IsJoinedVoice;
         public MainWindowViewModel()
         {
             WindowName = "Ludavi";
-
+            IsJoinedVoice = false;
+            JoinButtonText = "Join";
             this.openRoomDialogCommand = new RelayCommand(OnOpenRoomDialog);
             this.openLoginDialogCommand = new RelayCommand(OnOpenLoginDialog);
+            this.VoiceCommand = new RelayCommand(OnJoinVoice);
 
             connectToServer();
+            Chat = Visibility.Visible;
+            Voice = Visibility.Hidden;
 
             OpenLoginDialogCommand.Execute("nothing");
 
@@ -148,7 +158,7 @@ namespace Ludavi_Client.ViewModels
             roomTopic = "please select or add a room to start communicating!";
             if(Messages == null)
             {
-                Messages = new ObservableCollectionEx<IRoomContent>();
+                Messages = new ObservableCollectionEx<Message>();
             }
             
 
@@ -193,26 +203,47 @@ namespace Ludavi_Client.ViewModels
         }
 
 
-        private async void OnOpenLoginDialog(object paramater)
+        private void OnOpenLoginDialog(object paramater)
         {
             user = OpenLoginDialog();
             WindowName += $" - {user.Name}";
         }
 
-        public async void initRoom(Room room)
+        private async void OnJoinVoice(object paramater)
+        {
+            if (!IsJoinedVoice)
+            {
+                IsJoinedVoice = true;
+                await tcpHandler.SendMessage(user.UserId, roomManager.currentRoom.RoomID.ToString(), TCPHandler.MessageTypes.VOICE, "JOIN");
+                JoinButtonText = "Leave";
+            }
+            else
+            {
+                IsJoinedVoice = false;
+                await tcpHandler.SendMessage(user.UserId, roomManager.currentRoom.RoomID.ToString(), TCPHandler.MessageTypes.VOICE, "LEAVE");
+                JoinButtonText = "Join";
+            }
+        }
+
+        public void initRoom(Room room)
         {
             RoomName = room.Name;
             RoomTopic = room.Topic;
             if (room.Type == (int)RoomType.Text)
             {
                 roomManager.SelectRoom(room.RoomID);
-                Messages = new ObservableCollectionEx<IRoomContent>(roomManager.GetMessagesFromRoom());
+                Messages = new ObservableCollectionEx<Message>(roomManager.GetMessagesFromRoom());
+                Chat = Visibility.Visible;
+                Voice = Visibility.Hidden;
             } else if(room.Type == (int)RoomType.Voice)
             {
                 roomManager.SelectRoom(room.RoomID);
-                roomManager.GetVoiceUsers();                
+                roomManager.GetVoiceUsers();
+                Chat = Visibility.Hidden;
+                Voice = Visibility.Visible;
             }
         }
+        public RelayCommand VoiceCommand { get; set; }
 
         public RelayCommand SendCommand { get; set; }
 
@@ -257,8 +288,6 @@ namespace Ludavi_Client.ViewModels
         }
 
         #endregion
-
-       
 
         public RelayCommand SelectedItemChangedCommand { get; set; }
 

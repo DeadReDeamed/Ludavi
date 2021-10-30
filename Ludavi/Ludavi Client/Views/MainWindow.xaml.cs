@@ -31,7 +31,6 @@ namespace Ludavi_Client
         {
             InitializeComponent();
         }
-      
 
     }
 }

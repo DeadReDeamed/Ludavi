@@ -4,7 +4,7 @@ using System.Text;
 
 namespace TCPHandlerNameSpace.Models
 {
-    public class Message : IRoomContent
+    public class Message
     {
         public Message(string senderName, DateTime time, string content)
         {

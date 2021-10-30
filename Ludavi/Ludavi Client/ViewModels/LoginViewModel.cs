@@ -108,7 +108,7 @@ namespace Ludavi_Client.ViewModels
            Id = GuidFromString(UserName + ":" + Password);
 
             await TcpHandler.SendMessage(Guid.Empty, "", TCPHandler.MessageTypes.REGISTER, $"{Id} {UserName}");
-            string[] message = TcpHandler.ReadMessage();
+            string[] message = await TcpHandler.ReadMessage();
             Console.WriteLine(message[((int)TCPHandler.StringIndex.MESSAGE)]);
             ErrorText = message[((int)TCPHandler.StringIndex.MESSAGE)];
 
@@ -151,7 +151,7 @@ namespace Ludavi_Client.ViewModels
 
             //check if server knows id
             await TcpHandler.SendMessage(Guid.Empty, "", TCPHandler.MessageTypes.LOGIN, $"{Id} {UserName}");
-            string[] message = TcpHandler.ReadMessage();
+            string[] message = await TcpHandler.ReadMessage();
             
             if (message[((int)TCPHandler.StringIndex.MESSAGE)] == "ok") dialog.DialogResult = true;
             else ErrorText = message[((int)TCPHandler.StringIndex.MESSAGE)];

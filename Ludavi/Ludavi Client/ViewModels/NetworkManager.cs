@@ -24,17 +24,26 @@ namespace Ludavi_Client.ViewModels
             functions = new Dictionary<TCPHandler.MessageTypes, Action<string[]>>();
             functions.Add(TCPHandler.MessageTypes.CHAT, handleChatData);
             functions.Add(TCPHandler.MessageTypes.ROOM, handleRoomData);
+            functions.Add(TCPHandler.MessageTypes.VOICE, handleVoiceData);
             this.handler = tcphandler;
             Connected = true;
 
             new Thread( async () => {
                 while (Connected)
                 {
-                    string[] data = handler.ReadMessage();
+                    string[] data = await handler.ReadMessage();
                     functions[(TCPHandler.MessageTypes)int.Parse(data[(int)TCPHandler.StringIndex.TYPE])].Invoke(data);
                 }
             }).Start(); ;
 
+        }
+
+        private async void handleVoiceData(string[] data)
+        {
+            if(data[(int)TCPHandler.StringIndex.MESSAGE] == "OK")
+            {
+                await handler.SendMessage(Guid.Parse(data[(int)TCPHandler.StringIndex.ID]), "server", TCPHandler.MessageTypes.ROOM, "GETUSERSFROMROOM " + data[(int)TCPHandler.StringIndex.ROOMID]);
+            }
         }
 
         private void handleChatData(string[] data)

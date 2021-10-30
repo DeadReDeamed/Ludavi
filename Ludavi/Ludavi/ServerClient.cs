@@ -29,7 +29,7 @@ namespace Server
         {
             while (Connected)
             {
-                string[] data = Handler.ReadMessage();
+                string[] data = await Handler.ReadMessage();
 
                 try
                 {
