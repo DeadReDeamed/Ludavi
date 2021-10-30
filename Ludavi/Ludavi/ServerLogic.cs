@@ -17,6 +17,7 @@ namespace Server
         private static TCPHandler tcpHandler;
         private static List<Room> rooms;
         private delegate T sendToAll<T>(string[] data);
+        private delegate T sendToAllNoData<T>(Guid id, string roomID, TCPHandler.MessageTypes type, string message);
         public static Dictionary<TCPHandler.MessageTypes, Action<string[]>> functions;
         public static Dictionary<Room, ServerList> roomsAndMessages;
         public static Dictionary<Room, List<UdpClient>> voiceRoomsWithUdp;
@@ -124,15 +125,25 @@ namespace Server
 
         public static async void SendMessageToAllUsers(string[] data)
         {
-            sendToAll<Task> send = tcpHandler.SendMessage;
+            sendToAll<Task> send = null;
             send -= tcpHandler.SendMessage;
             foreach(KeyValuePair<Guid, ServerClient> key in clients)
             {
                 send += clients[key.Key].Handler.SendMessage;
             }
             await send.Invoke(data);
-        } 
-        
+        }
+
+        public static async void SendUpdateVoiceToAllUsers(Room room)
+        {
+            sendToAllNoData<Task> send = null;
+            foreach (KeyValuePair<Guid, ServerClient> key in clients)
+            {
+                send += clients[key.Key].Handler.SendMessage;
+            }
+            await send.Invoke(Guid.Empty, room.RoomID.ToString(), TCPHandler.MessageTypes.ROOM, "RETURNUSERS " + JsonConvert.SerializeObject(((VoiceList)roomsAndMessages[room]).list));
+        }
+
         public static async void HandleRoomManagement(string[] data)
         {
             //Console.WriteLine(data[(int)TCPHandler.StringIndex.MESSAGE]);
@@ -211,11 +222,12 @@ namespace Server
             {
                 
                 ((VoiceList)roomsAndMessages[currentRoom]).list.Add(currentUser);
-                await clients[Guid.Parse(data[(int)TCPHandler.StringIndex.ID])].Handler.SendMessage(Guid.Parse(data[(int)TCPHandler.StringIndex.ID]), data[(int)TCPHandler.StringIndex.ROOMID], TCPHandler.MessageTypes.VOICE, "OK");
+                SendUpdateVoiceToAllUsers(currentRoom);
             } else if(message == "LEAVE" && currentRoom != null && currentUser != null)
             {
                 ((VoiceList)roomsAndMessages[currentRoom]).list.Remove(currentUser);
-                await clients[Guid.Parse(data[(int)TCPHandler.StringIndex.ID])].Handler.SendMessage(Guid.Parse(data[(int)TCPHandler.StringIndex.ID]), data[(int)TCPHandler.StringIndex.ROOMID], TCPHandler.MessageTypes.VOICE, "OK");
+                SendUpdateVoiceToAllUsers(currentRoom);
+
             }
         }
 
