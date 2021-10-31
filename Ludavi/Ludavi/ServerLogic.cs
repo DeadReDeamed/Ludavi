@@ -161,7 +161,10 @@ namespace Server
             {
                 send += clients[key.Key].Handler.SendMessage;
             }
-            await send.Invoke(data);
+            if (send != null)
+            {
+                await send.Invoke(data);
+            }
         }
 
         public static async void SendUpdateVoiceToAllUsers(Room room)
@@ -171,7 +174,10 @@ namespace Server
             {
                 send += clients[key.Key].Handler.SendMessage;
             }
-            send.Invoke(Guid.Empty, room.RoomID.ToString(), TCPHandler.MessageTypes.ROOM, "RETURNUSERS " + JsonConvert.SerializeObject(((VoiceList)roomsAndMessages[room]).List));
+            if (send != null)
+            {
+                send.Invoke(Guid.Empty, room.RoomID.ToString(), TCPHandler.MessageTypes.ROOM, "RETURNUSERS " + JsonConvert.SerializeObject(((VoiceList)roomsAndMessages[room]).List));
+            }
         }
 
         public static void SendVoiceToAllUsers(Guid guid, uint roomID, byte[] message)
