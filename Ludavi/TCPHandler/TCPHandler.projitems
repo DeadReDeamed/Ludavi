@@ -16,5 +16,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)Models\User.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\Voice.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TCPHandler.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UDPHandler.cs" />
   </ItemGroup>
 </Project>

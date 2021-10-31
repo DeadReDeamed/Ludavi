@@ -3,10 +3,13 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
+using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using TCPHandlerNamespace;
 using TCPHandlerNameSpace;
 using TCPHandlerNameSpace.Models;
 
@@ -18,12 +21,15 @@ namespace Ludavi_Client.ViewModels
         private TCPHandler handler;
         public bool Connected { get; set; }
         public MainWindowViewModel MainWindowViewModel;
+        private UDPHandler udpHandler;
         public NetworkManager(TCPHandlerNameSpace.TCPHandler tcphandler, MainWindowViewModel mainWindowViewModel)
         {
             this.MainWindowViewModel = mainWindowViewModel;
+            udpHandler = new UDPHandler();
             functions = new Dictionary<TCPHandler.MessageTypes, Action<string[]>>();
             functions.Add(TCPHandler.MessageTypes.CHAT, handleChatData);
             functions.Add(TCPHandler.MessageTypes.ROOM, handleRoomData);
+            functions.Add(TCPHandler.MessageTypes.VOICE, handleVoiceData);
             this.handler = tcphandler;
             Connected = true;
 
@@ -35,6 +41,32 @@ namespace Ludavi_Client.ViewModels
                 }
             }).Start(); ;
 
+        }
+
+        private void handleVoiceData(string[] data)
+        {
+            string[] message = data[(int)TCPHandler.StringIndex.MESSAGE].Split(" ", 3);
+            if(message[0] == "OK")
+            {
+                udpHandler.Connect("127.0.0.1", int.Parse(message[1]));
+                udpHandler.SetReceivePoint(IPAddress.Any, int.Parse(message[2]));
+                startListeningForVoice();
+                MainWindowViewModel.StartSendingVoiceData();
+            }
+        }
+
+        private void startListeningForVoice()
+        {
+            new Thread(async () =>
+            {
+                Tuple<Guid, uint, byte[]> message = await udpHandler.ReceiveUdpMessage();
+                MainWindowViewModel.PlayVoiceData(message.Item3);
+            }).Start();
+        }
+
+        public void SendVoiceData(byte[] data)
+        {
+            udpHandler.SendUdpMessage(MainWindowViewModel.user.UserId, MainWindowViewModel.roomManager.currentRoom.RoomID, data);
         }
 
         private void handleChatData(string[] data)

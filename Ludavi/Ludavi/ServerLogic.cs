@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
@@ -18,10 +19,12 @@ namespace Server
         private static List<Room> rooms;
         private delegate T sendToAll<T>(string[] data);
         private delegate T sendToAllNoData<T>(Guid id, string roomID, TCPHandler.MessageTypes type, string message);
+        private delegate void sendVoiceToAll(Guid id, uint RoomID, byte[] message);
         public static Dictionary<TCPHandler.MessageTypes, Action<string[]>> functions;
         public static Dictionary<Room, ServerList> roomsAndMessages;
-        public static Dictionary<Room, List<UdpClient>> voiceRoomsWithUdp;
         public static List<User> usersInServer;
+        public static Dictionary<Room, List<Guid>> roomsAndUsers;
+        public static List<int> portsInUse;
 
         //public static void main(string[] args)
         //{
@@ -33,13 +36,17 @@ namespace Server
         {
             roomsAndMessages = new Dictionary<Room, ServerList>();
             clients = new Dictionary<Guid, ServerClient>();
-            voiceRoomsWithUdp = new Dictionary<Room, List<UdpClient>>();
+            roomsAndUsers = new Dictionary<Room, List<Guid>>();
+            portsInUse = new List<int>();
+
             functions = new Dictionary<TCPHandler.MessageTypes, Action<string[]>>();
+
             functions.Add(TCPHandler.MessageTypes.CHAT, SendChatToAllUsers);
             functions.Add(TCPHandler.MessageTypes.ROOM, HandleRoomManagement);
             functions.Add(TCPHandler.MessageTypes.VOICE, HandleVoiceData);
             usersInServer = new List<User>();
             tcpListener = new TcpListener(System.Net.IPAddress.Any, 80);
+            portsInUse.Add(80);
             tcpListener.Start();
             rooms = new List<Room>();
             Room general = new Room("General", "Just your general chatroom", (int)RoomType.Text,0);
@@ -144,6 +151,31 @@ namespace Server
             await send.Invoke(Guid.Empty, room.RoomID.ToString(), TCPHandler.MessageTypes.ROOM, "RETURNUSERS " + JsonConvert.SerializeObject(((VoiceList)roomsAndMessages[room]).list));
         }
 
+        public static void SendVoiceToAllUsers(Guid guid, uint roomID, byte[] message)
+        {
+            sendVoiceToAll send = null;
+            Room room = null;
+            foreach(Room r in rooms)
+            {
+                if(r.RoomID == roomID)
+                {
+                    room = r;
+                    break;
+                }
+            }
+            foreach (KeyValuePair<Guid, ServerClient> key in clients)
+            {
+                if (roomsAndUsers[room].Contains(key.Key) && key.Key != guid)
+                {
+                    send += clients[key.Key].UdpHandler.SendUdpMessage;
+                }
+            }
+            if (send != null)
+            {
+                send.Invoke(guid, roomID, message);
+            }
+        }
+
         public static async void HandleRoomManagement(string[] data)
         {
             //Console.WriteLine(data[(int)TCPHandler.StringIndex.MESSAGE]);
@@ -177,7 +209,7 @@ namespace Server
                         else if (newRoom.Type == (int)RoomType.Voice)
                         {
                             roomsAndMessages.Add(newRoom, new VoiceList(new List<User>()));
-                            voiceRoomsWithUdp.Add(newRoom, new List<UdpClient>());
+                            roomsAndUsers.Add(newRoom, new List<Guid>());
                         }
                         SendMessageToAllUsers(stringdata);
                     }
@@ -220,12 +252,22 @@ namespace Server
             }
             if (message == "JOIN" && currentRoom != null && currentUser != null)
             {
-                
                 ((VoiceList)roomsAndMessages[currentRoom]).list.Add(currentUser);
+                roomsAndUsers[currentRoom].Add(currentUser.UserId);
+                
                 SendUpdateVoiceToAllUsers(currentRoom);
+                int sendPort = new Random().Next(0, 1000);
+                while (portsInUse.Contains(sendPort)) sendPort = new Random().Next(0, 1000);
+                int receivePort = new Random().Next(0, 1000);
+                while (portsInUse.Contains(receivePort)) receivePort = new Random().Next(0, 1000);
+                clients[currentUser.UserId].startVoiceChat(receivePort);
+                clients[currentUser.UserId].UdpHandler.Connect("127.0.0.1", sendPort);
+                await clients[currentUser.UserId].Handler.SendMessage(Guid.Parse(data[(int)TCPHandler.StringIndex.ID]), "", TCPHandler.MessageTypes.VOICE, "OK " + sendPort + " " + receivePort);
             } else if(message == "LEAVE" && currentRoom != null && currentUser != null)
             {
+
                 ((VoiceList)roomsAndMessages[currentRoom]).list.Remove(currentUser);
+                roomsAndUsers[currentRoom].Remove(currentUser.UserId);
                 SendUpdateVoiceToAllUsers(currentRoom);
 
             }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Net.Sockets;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -10,7 +11,9 @@ using System.Windows.Input;
 using Ludavi_Client.Models;
 using Ludavi_Client.Util;
 using Ludavi_Client.Views;
+using LumiSoft.Media.Wave;
 using Newtonsoft.Json;
+using TCPHandlerNamespace;
 using TCPHandlerNameSpace;
 using TCPHandlerNameSpace.Models;
 
@@ -132,6 +135,8 @@ namespace Ludavi_Client.ViewModels
         private string joinButtonText { get; set; }
         public string JoinButtonText { get { return joinButtonText; } set { joinButtonText = value; OnPropertyChanged("JoinButtonText"); } }
         public bool IsJoinedVoice;
+        private WaveIn soundReceiver = null;
+        private WaveOut soundPlayer = null;
         public MainWindowViewModel()
         {
             WindowName = "Ludavi";
@@ -140,7 +145,6 @@ namespace Ludavi_Client.ViewModels
             this.openRoomDialogCommand = new RelayCommand(OnOpenRoomDialog);
             this.openLoginDialogCommand = new RelayCommand(OnOpenLoginDialog);
             this.VoiceCommand = new RelayCommand(OnJoinVoice);
-
             connectToServer();
             Chat = Visibility.Visible;
             Voice = Visibility.Hidden;
@@ -190,7 +194,6 @@ namespace Ludavi_Client.ViewModels
             client = new TcpClient();
             client.Connect("localhost", 80);
             tcpHandler = new TCPHandler(client.GetStream());
-            //Console.WriteLine("dawdad");
         }
 
         private User OpenLoginDialog()
@@ -301,6 +304,23 @@ namespace Ludavi_Client.ViewModels
         {
             this.network.Connected = false;
             this.client.GetStream().Close();
+        }
+
+        public void StartSendingVoiceData()
+        {
+            soundReceiver = new WaveIn(WaveIn.Devices[0], 8000, 16, 1, 400);
+            soundPlayer = new WaveOut(WaveOut.Devices[0], 8000, 16, 1);
+            soundReceiver.BufferFull += new BufferFullHandler(VoiceBufferFull);
+            soundReceiver.Start();
+        }
+        public void VoiceBufferFull(byte[] buffer)
+        {
+            network.SendVoiceData(buffer);
+        }
+
+        public void PlayVoiceData(byte[] data)
+        {
+            soundPlayer.Play(data, 0, data.Length);
         }
     }
 }
