@@ -184,14 +184,14 @@ namespace Ludavi_Client.ViewModels
 
         public async void SendMessageToRoom(string message)
         {
-            await tcpHandler.SendMessage(User.UserId, RoomManager.currentRoom.RoomID.ToString(), TCPHandler.MessageTypes.CHAT, User.Name + ":" + message);
+            tcpHandler.SendMessage(user.UserId, roomManager.currentRoom.RoomID.ToString(), TCPHandler.MessageTypes.CHAT, user.Name + ":" + message);
         }
 
         public void ConnectToServer()
         {
             client = new TcpClient();
             client.Connect("localhost", 80);
-            tcpHandler = new TCPHandler(client.GetStream());
+            tcpHandler = new TCPHandler(new MyNetworkStream(client.GetStream()));
         }
 
         private User OpenLoginDialog()
@@ -215,13 +215,13 @@ namespace Ludavi_Client.ViewModels
             if (!IsJoinedVoice)
             {
                 IsJoinedVoice = true;
-                await tcpHandler.SendMessage(User.UserId, RoomManager.currentRoom.RoomID.ToString(), TCPHandler.MessageTypes.VOICE, "JOIN");
+                tcpHandler.SendMessage(user.UserId, roomManager.currentRoom.RoomID.ToString(), TCPHandler.MessageTypes.VOICE, "JOIN");
                 JoinButtonText = "Leave";
             }
             else
             {
                 IsJoinedVoice = false;
-                await tcpHandler.SendMessage(User.UserId, RoomManager.currentRoom.RoomID.ToString(), TCPHandler.MessageTypes.VOICE, "LEAVE");
+                tcpHandler.SendMessage(user.UserId, roomManager.currentRoom.RoomID.ToString(), TCPHandler.MessageTypes.VOICE, "LEAVE");
                 JoinButtonText = "Join";
             }
         }
@@ -272,7 +272,7 @@ namespace Ludavi_Client.ViewModels
             roomDialog.ShowDialog();
             AddRoomViewModel roomDialogContext = (AddRoomViewModel)(roomDialog.DataContext);
             Room result = roomDialogContext.RoomResult;
-            await tcpHandler.SendMessage(User.UserId, "", TCPHandler.MessageTypes.ROOM, "ADDROOM " + JsonConvert.SerializeObject(result));
+            tcpHandler.SendMessage(user.UserId, "", TCPHandler.MessageTypes.ROOM, "ADDROOM " + JsonConvert.SerializeObject(result));
             return result;
         }
 
@@ -300,7 +300,7 @@ namespace Ludavi_Client.ViewModels
 
         public async void Dispose()
         {
-            await tcpHandler.SendMessage(User.UserId, "", TCPHandler.MessageTypes.LEAVE, "CLOSE ");
+            tcpHandler.SendMessage(user.UserId, "", TCPHandler.MessageTypes.LEAVE, "CLOSE ");
         }
 
         public void StartSendingVoiceData()

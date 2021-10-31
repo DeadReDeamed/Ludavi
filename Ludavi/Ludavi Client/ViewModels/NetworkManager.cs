@@ -37,7 +37,7 @@ namespace Ludavi_Client.ViewModels
             new Thread( async () => {
                 while (Connected)
                 {
-                    string[] data = await handler.ReadMessage();
+                    string[] data = handler.ReadMessage();
                     functions[(TCPHandler.MessageTypes)int.Parse(data[(int)TCPHandler.StringIndex.TYPE])].Invoke(data);
                 }
             }).Start(); ;

@@ -55,7 +55,7 @@ namespace Server
         {
             while (Connected)
             {
-                string[] data = await Handler.ReadMessage();
+                string[] data = Handler.ReadMessage();
 
                 try
                 {
