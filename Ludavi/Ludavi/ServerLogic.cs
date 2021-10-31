@@ -26,11 +26,6 @@ namespace Server
         public static Dictionary<Room, List<Guid>> roomsAndUsers;
         public static List<int> portsInUse;
 
-        //public static void main(string[] args)
-        //{
-        //    runserver();
-        //}
-
         private delegate void Tasks(string[] data);
         public static void RunServer()
         {
@@ -66,7 +61,6 @@ namespace Server
                 {
                     clients[id].Handler.SendMessage(Guid.Empty, "", TCPHandler.MessageTypes.LEAVE, $"ok");
                     c.Value.Client.GetStream().Close();
-                    //c.Value.Client.Close();
                     c.Value.Connected = false;
                     usersInServer.Remove(c.Value.User);
                 }
@@ -196,7 +190,6 @@ namespace Server
 
         public static async void HandleRoomManagement(string[] data)
         {
-            //Console.WriteLine(data[(int)TCPHandler.StringIndex.MESSAGE]);
             string message = data[(int)TCPHandler.StringIndex.MESSAGE];
             var messageSplit = message.Split(" ", 2);
             switch (messageSplit[0])
