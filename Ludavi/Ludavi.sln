@@ -11,11 +11,14 @@ Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "TCPHandlerProject", "TCPHan
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WavPlayer", "AdvancedWave\WavPlayer\WavPlayer.csproj", "{A529ECB4-E537-49B1-BC71-A940CA2491A9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LudaviTest", "LudaviTest\LudaviTest.csproj", "{FDF329F9-EF85-4294-ACD6-875AF2E79A2E}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		TCPHandler\TCPHandler.projitems*{23963d95-a5dc-4c5c-a80c-efded780f97a}*SharedItemsImports = 13
 		TCPHandler\TCPHandler.projitems*{3eb9495f-15ad-4c4e-8fc5-e5317c497057}*SharedItemsImports = 5
 		TCPHandler\TCPHandler.projitems*{498e1f2e-251a-453c-8214-679e89b0c798}*SharedItemsImports = 5
+		TCPHandler\TCPHandler.projitems*{fdf329f9-ef85-4294-acd6-875af2e79a2e}*SharedItemsImports = 5
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -34,6 +37,10 @@ Global
 		{A529ECB4-E537-49B1-BC71-A940CA2491A9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A529ECB4-E537-49B1-BC71-A940CA2491A9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A529ECB4-E537-49B1-BC71-A940CA2491A9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FDF329F9-EF85-4294-ACD6-875AF2E79A2E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FDF329F9-EF85-4294-ACD6-875AF2E79A2E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FDF329F9-EF85-4294-ACD6-875AF2E79A2E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FDF329F9-EF85-4294-ACD6-875AF2E79A2E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

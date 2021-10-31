@@ -85,12 +85,12 @@ namespace Ludavi_Client.Models
 
         public async void UpdateRooms()
         {
-            await handler.SendMessage(userID, "server", TCPHandler.MessageTypes.ROOM, "GETROOMS");
+            handler.SendMessage(userID, "server", TCPHandler.MessageTypes.ROOM, "GETROOMS");
         }
 
         public async void GetVoiceUsers()
         {
-            await handler.SendMessage(userID, "server", TCPHandler.MessageTypes.ROOM, "GETUSERSFROMROOM " + currentRoom.RoomID);
+            handler.SendMessage(userID, "server", TCPHandler.MessageTypes.ROOM, "GETUSERSFROMROOM " + currentRoom.RoomID);
            
         }
 

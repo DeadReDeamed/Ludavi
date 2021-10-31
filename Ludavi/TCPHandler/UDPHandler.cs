@@ -52,7 +52,7 @@ namespace TCPHandlerNamespace
         {
             byte[] message;
             message = Client.Receive(ref receivingEndPoint);
-            
+            udpSocket.Receive(message);
             int lengthGuid = BitConverter.ToInt32(message, 0);
             byte[] guidBytes = new byte[lengthGuid];
             int startIndex = 4;

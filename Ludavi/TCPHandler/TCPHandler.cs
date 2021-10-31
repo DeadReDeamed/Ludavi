@@ -5,16 +5,17 @@ using System.Net.Sockets;
 using System.Threading.Tasks;
 using System.Net;
 
+
 namespace TCPHandlerNameSpace
 {
     public class TCPHandler
     {
-        private NetworkStream stream;
-        public TCPHandler(NetworkStream stream)
+        private INetworkStream stream;
+        public TCPHandler(INetworkStream stream)
         {
             this.stream = stream;
         }
-        public async Task<Task> SendMessage(Guid id, string roomID, MessageTypes type, string message)
+        public void SendMessage(Guid id, string roomID, MessageTypes type, string message)
         {
             string dataString = $"{id} {roomID} {(int)type} {message}";
             byte[] length = BitConverter.GetBytes(dataString.Length);
@@ -22,9 +23,8 @@ namespace TCPHandlerNameSpace
             byte[] dataBytes = new byte[length.Length + stringBytes.Length];
             Encoding.ASCII.GetBytes(dataString).CopyTo(dataBytes, 4);
             length.CopyTo(dataBytes, 0);
-            await stream.WriteAsync(dataBytes);
+            stream.Write(dataBytes);
             stream.Flush();
-            return Task.CompletedTask;
         }
 
         public async Task<Task> SendMessage(string[] data)
@@ -40,18 +40,18 @@ namespace TCPHandlerNameSpace
             byte[] dataBytes = new byte[length.Length + stringBytes.Length];
             Encoding.ASCII.GetBytes(dataString).CopyTo(dataBytes, 4);
             length.CopyTo(dataBytes, 0);
-            await stream.WriteAsync(dataBytes);
+            stream.Write(dataBytes);
             stream.Flush();
             return Task.CompletedTask;
         }
-        public async Task<string[]> ReadMessage()
+        public string[] ReadMessage()
         {
             byte[] buffer = new byte[4];
-            await stream.ReadAsync(buffer, 0, buffer.Length);
+            stream.Read(buffer, 0, buffer.Length);
             
             int length = BitConverter.ToInt32(buffer);
             buffer = new byte[length];
-            await stream.ReadAsync(buffer, 0, length);
+            stream.Read(buffer, 0, length);
             string dataString = Encoding.ASCII.GetString(buffer);
             string[] dataStringArray = dataString.Split(" ", 4);
             string message = dataStringArray[(int)StringIndex.MESSAGE];
