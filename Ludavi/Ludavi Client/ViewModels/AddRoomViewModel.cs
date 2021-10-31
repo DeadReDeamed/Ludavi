@@ -16,7 +16,7 @@ namespace Ludavi_Client.ViewModels
     public class AddRoomViewModel : INotifyPropertyChanged
     {
 
-        public string windowTitle => "add a room";
+        public string WindowTitle => "add a room";
 
         
         public Room RoomResult

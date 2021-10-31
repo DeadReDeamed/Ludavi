@@ -16,13 +16,13 @@ namespace Ludavi_Client.ViewModels
     public class LoginViewModel : INotifyPropertyChanged
     {
 
-        public string windowTitle => "login";
+        public string WindowTitle => "login";
 
         public TCPHandler TcpHandler;
 
         #region define userName
 
-        private string userName { get; set; }
+        private string userName;
         public string UserName
         {
             get { return userName; }
@@ -37,7 +37,7 @@ namespace Ludavi_Client.ViewModels
 
         #region define errorText
 
-        private string errorText { get; set; }
+        private string errorText;
         public string ErrorText
         {
             get { return errorText; }
@@ -58,7 +58,7 @@ namespace Ludavi_Client.ViewModels
 
         #region define ID
 
-        private Guid id { get; set; }
+        private Guid id;
         public Guid Id
         {
             get { return id; }

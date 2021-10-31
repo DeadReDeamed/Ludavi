@@ -24,7 +24,7 @@ namespace Ludavi_Client.ViewModels
 
         #region define windowName
 
-        private string windowName { get; set; }
+        private string windowName;
         public string WindowName
         {
             get { return windowName; }
@@ -39,7 +39,7 @@ namespace Ludavi_Client.ViewModels
 
         #region define roomName
 
-        private string roomName { get; set; }
+        private string roomName;
         public string RoomName
         {
             get { return roomName; }
@@ -54,7 +54,7 @@ namespace Ludavi_Client.ViewModels
 
         #region define textBoxText
 
-        private string textBoxText { get; set; }
+        private string textBoxText;
         public string TextBoxText
         {
             get { return textBoxText; }
@@ -68,7 +68,7 @@ namespace Ludavi_Client.ViewModels
         #endregion
 
         #region define roomTopic
-        private string roomTopic { get; set; }
+        private string roomTopic;
         public string RoomTopic
         {
             get { return roomTopic; }
@@ -81,7 +81,7 @@ namespace Ludavi_Client.ViewModels
         #endregion
 
         #region define roomsCollection
-        private ObservableCollectionEx<Room> roomsCollection { get; set; }
+        private ObservableCollectionEx<Room> roomsCollection;
         public ObservableCollectionEx<Room> RoomsCollection
         {
             get { return roomsCollection; }
@@ -96,7 +96,7 @@ namespace Ludavi_Client.ViewModels
 
         #region define VoiceUsers
 
-        private ObservableCollectionEx<User> voiceUsers { get; set; }
+        private ObservableCollectionEx<User> voiceUsers;
         public ObservableCollectionEx<User> VoiceUsers
         {
             get { return voiceUsers; }
@@ -110,7 +110,7 @@ namespace Ludavi_Client.ViewModels
         #endregion
 
         #region define Messages
-        private ObservableCollectionEx<Message> messages { get; set; }
+        private ObservableCollectionEx<Message> messages;
         public ObservableCollectionEx<Message> Messages
         {
             get { return messages; }
@@ -124,8 +124,8 @@ namespace Ludavi_Client.ViewModels
         #endregion
 
         private static TCPHandler tcpHandler;
-        public static User user { get; private set; }
-        public RoomManager roomManager { get; set; }
+        public static User User { get; private set; }
+        public RoomManager RoomManager { get; set; }
         public TcpClient client;
         private NetworkManager network;
         public Visibility Chat { get { return _chat; } set { _chat = value; OnPropertyChanged("Chat"); } }
@@ -145,16 +145,16 @@ namespace Ludavi_Client.ViewModels
             this.openRoomDialogCommand = new RelayCommand(OnOpenRoomDialog);
             this.openLoginDialogCommand = new RelayCommand(OnOpenLoginDialog);
             this.VoiceCommand = new RelayCommand(OnJoinVoice);
-            connectToServer();
+            ConnectToServer();
             Chat = Visibility.Visible;
             Voice = Visibility.Hidden;
 
             OpenLoginDialogCommand.Execute("nothing");
 
-            roomManager = new RoomManager(tcpHandler, user.UserId, this);
+            RoomManager = new RoomManager(tcpHandler, User.UserId, this);
             roomsCollection = new ();
 
-            roomManager.rooms.ForEach(room => RoomsCollection.Add(room));
+            RoomManager.rooms.ForEach(room => RoomsCollection.Add(room));
 
             network = new NetworkManager(tcpHandler, this);
 
@@ -168,7 +168,7 @@ namespace Ludavi_Client.ViewModels
             SelectedItemChangedCommand = new RelayCommand((selectedItem) =>
             {
                 if(selectedItem != null)
-                    initRoom((Room)selectedItem);
+                    InitRoom((Room)selectedItem);
             });
 
             SendCommand = new RelayCommand((nothing) =>
@@ -184,10 +184,10 @@ namespace Ludavi_Client.ViewModels
 
         public async void SendMessageToRoom(string message)
         {
-            await tcpHandler.SendMessage(user.UserId, roomManager.currentRoom.RoomID.ToString(), TCPHandler.MessageTypes.CHAT, user.Name + ":" + message);
+            await tcpHandler.SendMessage(User.UserId, RoomManager.currentRoom.RoomID.ToString(), TCPHandler.MessageTypes.CHAT, User.Name + ":" + message);
         }
 
-        public void connectToServer()
+        public void ConnectToServer()
         {
             client = new TcpClient();
             client.Connect("localhost", 80);
@@ -206,8 +206,8 @@ namespace Ludavi_Client.ViewModels
 
         private void OnOpenLoginDialog(object paramater)
         {
-            user = OpenLoginDialog();
-            WindowName += $" - {user.Name}";
+            User = OpenLoginDialog();
+            WindowName += $" - {User.Name}";
         }
 
         private async void OnJoinVoice(object paramater)
@@ -215,31 +215,31 @@ namespace Ludavi_Client.ViewModels
             if (!IsJoinedVoice)
             {
                 IsJoinedVoice = true;
-                await tcpHandler.SendMessage(user.UserId, roomManager.currentRoom.RoomID.ToString(), TCPHandler.MessageTypes.VOICE, "JOIN");
+                await tcpHandler.SendMessage(User.UserId, RoomManager.currentRoom.RoomID.ToString(), TCPHandler.MessageTypes.VOICE, "JOIN");
                 JoinButtonText = "Leave";
             }
             else
             {
                 IsJoinedVoice = false;
-                await tcpHandler.SendMessage(user.UserId, roomManager.currentRoom.RoomID.ToString(), TCPHandler.MessageTypes.VOICE, "LEAVE");
+                await tcpHandler.SendMessage(User.UserId, RoomManager.currentRoom.RoomID.ToString(), TCPHandler.MessageTypes.VOICE, "LEAVE");
                 JoinButtonText = "Join";
             }
         }
 
-        public void initRoom(Room room)
+        public void InitRoom(Room room)
         {
             RoomName = room.Name;
             RoomTopic = room.Topic;
             if (room.Type == (int)RoomType.Text)
             {
-                roomManager.SelectRoom(room.RoomID);
-                Messages = new ObservableCollectionEx<Message>(roomManager.GetMessagesFromRoom());
+                RoomManager.SelectRoom(room.RoomID);
+                Messages = new ObservableCollectionEx<Message>(RoomManager.GetMessagesFromRoom());
                 Chat = Visibility.Visible;
                 Voice = Visibility.Hidden;
             } else if(room.Type == (int)RoomType.Voice)
             {
-                roomManager.SelectRoom(room.RoomID);
-                roomManager.GetVoiceUsers();
+                RoomManager.SelectRoom(room.RoomID);
+                RoomManager.GetVoiceUsers();
                 Chat = Visibility.Hidden;
                 Voice = Visibility.Visible;
             }
@@ -272,7 +272,7 @@ namespace Ludavi_Client.ViewModels
             roomDialog.ShowDialog();
             AddRoomViewModel roomDialogContext = (AddRoomViewModel)(roomDialog.DataContext);
             Room result = roomDialogContext.RoomResult;
-            await tcpHandler.SendMessage(user.UserId, "", TCPHandler.MessageTypes.ROOM, "ADDROOM " + JsonConvert.SerializeObject(result));
+            await tcpHandler.SendMessage(User.UserId, "", TCPHandler.MessageTypes.ROOM, "ADDROOM " + JsonConvert.SerializeObject(result));
             return result;
         }
 
@@ -285,7 +285,7 @@ namespace Ludavi_Client.ViewModels
             
             Console.WriteLine(room);
             RoomsCollection.Add(room);
-            initRoom(roomManager.currentRoom);
+            InitRoom(RoomManager.currentRoom);
         }
 
         #endregion
@@ -300,7 +300,7 @@ namespace Ludavi_Client.ViewModels
 
         public async void Dispose()
         {
-            await tcpHandler.SendMessage(user.UserId, "", TCPHandler.MessageTypes.LEAVE, "CLOSE ");
+            await tcpHandler.SendMessage(User.UserId, "", TCPHandler.MessageTypes.LEAVE, "CLOSE ");
         }
 
         public void StartSendingVoiceData()

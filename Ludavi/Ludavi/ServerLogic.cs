@@ -54,7 +54,7 @@ namespace Server
             Room general = new Room("General", "Just your general chatroom", (int)RoomType.Text,0);
             rooms.Add(general);
             roomsAndMessages.Add(general, new MessageList(new List<Message>()));
-            tcpListener.BeginAcceptTcpClient(new AsyncCallback(connectClientsToServer), null);
+            tcpListener.BeginAcceptTcpClient(new AsyncCallback(ConnectClientsToServer), null);
 
         }
 
@@ -62,7 +62,7 @@ namespace Server
         {
             Dictionary<Guid, ServerClient> clients = new Dictionary<Guid, ServerClient>();
 
-            FileIO.tryGetUsersFromSaveFile(ref clients);
+            FileIO.TryGetUsersFromSaveFile(ref clients);
 
             return clients;
         }
@@ -83,7 +83,7 @@ namespace Server
             }
         }
 
-        public static async void connectClientsToServer(IAsyncResult ar)
+        public static async void ConnectClientsToServer(IAsyncResult ar)
         {
             var tcpClient = tcpListener.EndAcceptTcpClient(ar);
             tcpHandler = new TCPHandler(tcpClient.GetStream());
@@ -98,9 +98,9 @@ namespace Server
                 _ => throw new Exception("Login request was not recognized")
             };
 
-            if (!result) connectClientsToServer(ar);
+            if (!result) ConnectClientsToServer(ar);
 
-            tcpListener.BeginAcceptTcpClient(new AsyncCallback(connectClientsToServer), null);
+            tcpListener.BeginAcceptTcpClient(new AsyncCallback(ConnectClientsToServer), null);
         }
 
 
@@ -155,7 +155,7 @@ namespace Server
                 }
             }
             string[] messageValues = data[(int)TCPHandler.StringIndex.MESSAGE].Split(':', 2);
-            ((MessageList)roomsAndMessages[currentRoom]).list.Add(new Message(messageValues[0] + "#" + data[(int)TCPHandler.StringIndex.ID].Substring(0, 4), DateTime.Now, messageValues[1])); ;
+            ((MessageList)roomsAndMessages[currentRoom]).List.Add(new Message(messageValues[0] + "#" + data[(int)TCPHandler.StringIndex.ID].Substring(0, 4), DateTime.Now, messageValues[1])); ;
             SendMessageToAllUsers(data);
         }
 
@@ -177,7 +177,7 @@ namespace Server
             {
                 send += clients[key.Key].Handler.SendMessage;
             }
-            await send.Invoke(Guid.Empty, room.RoomID.ToString(), TCPHandler.MessageTypes.ROOM, "RETURNUSERS " + JsonConvert.SerializeObject(((VoiceList)roomsAndMessages[room]).list));
+            await send.Invoke(Guid.Empty, room.RoomID.ToString(), TCPHandler.MessageTypes.ROOM, "RETURNUSERS " + JsonConvert.SerializeObject(((VoiceList)roomsAndMessages[room]).List));
         }
 
         public static void SendVoiceToAllUsers(Guid guid, uint roomID, byte[] message)
@@ -219,7 +219,7 @@ namespace Server
                     foreach(KeyValuePair<Room, ServerList> key in roomsAndMessages){
                         if(key.Key.Type == (int)RoomType.Text)
                         {
-                            messagesPerList.Add(((MessageList)key.Value).list);
+                            messagesPerList.Add(((MessageList)key.Value).List);
                         } 
                     }
                     await clients[Guid.Parse(data[(int)TCPHandler.StringIndex.ID])].Handler.SendMessage(Guid.Parse(data[(int)TCPHandler.StringIndex.ID]), "", TCPHandler.MessageTypes.ROOM, "RETURNROOMS " + "MESSAGES " + JsonConvert.SerializeObject(messagesPerList));
@@ -248,7 +248,7 @@ namespace Server
                     {
                         if(key.Key.RoomID == uint.Parse(messageSplit[1]))
                         {
-                            await clients[Guid.Parse(data[(int)TCPHandler.StringIndex.ID])].Handler.SendMessage(Guid.Parse(data[(int)TCPHandler.StringIndex.ID]), "", TCPHandler.MessageTypes.ROOM, "RETURNUSERS " + JsonConvert.SerializeObject(((VoiceList)key.Value).list));
+                            await clients[Guid.Parse(data[(int)TCPHandler.StringIndex.ID])].Handler.SendMessage(Guid.Parse(data[(int)TCPHandler.StringIndex.ID]), "", TCPHandler.MessageTypes.ROOM, "RETURNUSERS " + JsonConvert.SerializeObject(((VoiceList)key.Value).List));
                             break;
 
                         }
@@ -281,7 +281,7 @@ namespace Server
             }
             if (message == "JOIN" && currentRoom != null && currentUser != null)
             {
-                ((VoiceList)roomsAndMessages[currentRoom]).list.Add(currentUser);
+                ((VoiceList)roomsAndMessages[currentRoom]).List.Add(currentUser);
                 roomsAndUsers[currentRoom].Add(currentUser.UserId);
                 
                 SendUpdateVoiceToAllUsers(currentRoom);
@@ -297,7 +297,7 @@ namespace Server
             } else if(message == "LEAVE" && currentRoom != null && currentUser != null)
             {
 
-                ((VoiceList)roomsAndMessages[currentRoom]).list.Remove(currentUser);
+                ((VoiceList)roomsAndMessages[currentRoom]).List.Remove(currentUser);
                 roomsAndUsers[currentRoom].Remove(currentUser.UserId);
                 SendUpdateVoiceToAllUsers(currentRoom);
 
@@ -312,7 +312,7 @@ namespace Server
                 c.Value.IsInVoice = false;
             }
 
-            FileIO.writeUsersToSaveFile(clients);
+            FileIO.WriteUsersToSaveFile(clients);
         }
     }
 

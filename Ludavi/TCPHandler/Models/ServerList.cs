@@ -11,19 +11,19 @@ namespace TCPHandlerNameSpace.Models
 
     public class MessageList : ServerList
     {
-        public List<Message> list { get; set; }
+        public List<Message> List { get; set; }
         public MessageList(List<Message> list)
         {
-            this.list = list;
+            this.List = list;
         }
     }
 
     public class VoiceList : ServerList
     {
-        public List<User> list { get; set; }
+        public List<User> List { get; set; }
         public VoiceList(List<User> list)
         {
-            this.list = list;
+            this.List = list;
         }
     }
 }

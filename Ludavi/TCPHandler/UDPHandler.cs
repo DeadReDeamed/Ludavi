@@ -9,23 +9,24 @@ namespace TCPHandlerNamespace
 {
     public class UDPHandler
     {
-        private UdpClient Client;
+        private UdpClient client;
         private Socket udpSocket;
         private UdpClient receivingClient;
         private IPEndPoint receivingEndPoint;
-        public IPEndPoint sendingEndPoint { get; set; }
-        private bool FirstTimeConnect;
-        public IPAddress receiverAddress { get; set; }
+        private bool firstTimeConnect;
+
+        public IPEndPoint SendingEndPoint { get; set; }
+        public IPAddress ReceiverAddress { get; set; }
         public int SendingPort { get; set; }
         public UDPHandler()
         {
             udpSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-            FirstTimeConnect = true;
+            firstTimeConnect = true;
         }
 
         public void Connect(int port)
         {
-            Client = new UdpClient(port);
+            client = new UdpClient(port);
             SendingPort = port;
         }
 
@@ -45,13 +46,13 @@ namespace TCPHandlerNamespace
             roomIdLength.CopyTo(tempPacket, length.Length + uid.Length);
             roomid.CopyTo(tempPacket, length.Length + uid.Length + roomIdLength.Length);
             message.CopyTo(tempPacket, length.Length + uid.Length + roomIdLength.Length + roomid.Length);
-            Client.Send(tempPacket, tempPacket.Length, receiverAddress.ToString(), SendingPort);
+            client.Send(tempPacket, tempPacket.Length, ReceiverAddress.ToString(), SendingPort);
         }
 
         public Tuple<Guid, uint, byte[]> ReceiveUdpMessage()
         {
             byte[] message;
-            message = Client.Receive(ref receivingEndPoint);
+            message = client.Receive(ref receivingEndPoint);
             
             int lengthGuid = BitConverter.ToInt32(message, 0);
             byte[] guidBytes = new byte[lengthGuid];
@@ -68,10 +69,10 @@ namespace TCPHandlerNamespace
             startIndex += roomIdBytes.Length;
             byte[] messageBytes = new byte[message.Length - startIndex - roomIdBytes.Length];
             Array.Copy(message, startIndex, messageBytes, 0, messageBytes.Length);
-            if (FirstTimeConnect)
+            if (firstTimeConnect)
             {
-                receiverAddress = receivingEndPoint.Address;
-                FirstTimeConnect = false;
+                ReceiverAddress = receivingEndPoint.Address;
+                firstTimeConnect = false;
             }
 
             return new Tuple<Guid ,uint, byte[]>(id, roomId, messageBytes);

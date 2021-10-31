@@ -15,7 +15,7 @@ namespace Server
     {
 
 
-        public static void writeUsersToSaveFile(Dictionary<Guid, ServerClient> dict) {
+        public static void WriteUsersToSaveFile(Dictionary<Guid, ServerClient> dict) {
 
             var fileFolder = Path.Combine(Environment.GetFolderPath(
                         Environment.SpecialFolder.ApplicationData), "Ludavi");
@@ -35,7 +35,7 @@ namespace Server
             File.WriteAllText(fileName, jsonString);
         }
 
-        public static void tryGetUsersFromSaveFile(ref Dictionary<Guid, ServerClient> clients)
+        public static void TryGetUsersFromSaveFile(ref Dictionary<Guid, ServerClient> clients)
         {
             IFormatter formatter = new BinaryFormatter();
 

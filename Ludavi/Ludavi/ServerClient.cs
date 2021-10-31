@@ -19,9 +19,6 @@ namespace Server
         [JsonInclude]
         public User User { get; set; }
 
-        [JsonInclude]
-        public uint currentRoomid { get; set; }
-
         [JsonIgnore]
         public TCPHandler Handler { get; set; }
 
@@ -43,7 +40,7 @@ namespace Server
             this.Handler = handler;
             this.Client = client;
             Connected = true;
-            new Thread(async () => { startListening(); }).Start();
+            new Thread(async () => { StartListening(); }).Start();
             UdpHandler = new UDPHandler();
         }
 
@@ -54,7 +51,7 @@ namespace Server
             this.Client = null;
         }
 
-        public async void startListening()
+        public async void StartListening()
         {
             while (Connected)
             {
@@ -71,7 +68,7 @@ namespace Server
             }
         }
 
-        public void startVoiceChat(int receivePort)
+        public void StartVoiceChat(int receivePort)
         {
             UdpHandler.SetReceivePoint(IPAddress.Any, receivePort);
             IsInVoice = true;

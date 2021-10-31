@@ -30,7 +30,7 @@ namespace Ludavi_Client.ViewModels
             functions.Add(TCPHandler.MessageTypes.CHAT, HandleChatData);
             functions.Add(TCPHandler.MessageTypes.ROOM, HandleRoomData);
             functions.Add(TCPHandler.MessageTypes.LEAVE, HandleLeaving);
-            functions.Add(TCPHandler.MessageTypes.VOICE, handleVoiceData);
+            functions.Add(TCPHandler.MessageTypes.VOICE, HandleVoiceData);
             this.handler = tcphandler;
             Connected = true;
 
@@ -44,7 +44,7 @@ namespace Ludavi_Client.ViewModels
 
         }
 
-        private void handleVoiceData(string[] data)
+        private void HandleVoiceData(string[] data)
         {
             string[] message = data[(int)TCPHandler.StringIndex.MESSAGE].Split(" ", 3);
             if(message[0] == "OK")
@@ -58,7 +58,7 @@ namespace Ludavi_Client.ViewModels
             }
         }
 
-        private void startListeningForVoice()
+        private void StartListeningForVoice()
         {
             new Thread(async () =>
             {
@@ -69,7 +69,7 @@ namespace Ludavi_Client.ViewModels
 
         public void SendVoiceData(byte[] data)
         {
-            udpHandler.SendUdpMessage(MainWindowViewModel.user.UserId, MainWindowViewModel.roomManager.currentRoom.RoomID, data);
+            udpHandler.SendUdpMessage(MainWindowViewModel.User.UserId, MainWindowViewModel.RoomManager.currentRoom.RoomID, data);
         }
 
         private void HandleLeaving(string[] data)
@@ -80,7 +80,7 @@ namespace Ludavi_Client.ViewModels
 
         private void HandleChatData(string[] data)
         {
-            RoomManager roomManager = MainWindowViewModel.roomManager;
+            RoomManager roomManager = MainWindowViewModel.RoomManager;
             string[] messageValues = data[(int)TCPHandler.StringIndex.MESSAGE].Split(':', 2);
             Message message = new Message(messageValues[0] + "#" + data[(int)TCPHandler.StringIndex.ID].Substring(0,4), DateTime.Now, messageValues[1]);
             roomManager.AddMessageToRoom(uint.Parse(data[(int)TCPHandler.StringIndex.ROOMID]), message);
@@ -95,14 +95,14 @@ namespace Ludavi_Client.ViewModels
             switch (message[0])
             {
                 case "UPDATEROOMS":
-                    MainWindowViewModel.roomManager.UpdateRooms();
+                    MainWindowViewModel.RoomManager.UpdateRooms();
 
                     Application.Current.Dispatcher.BeginInvoke(new Action(() =>
                     {
                         this.MainWindowViewModel.RoomsCollection.Clear();
                     }));
 
-                    MainWindowViewModel.roomManager.rooms.ForEach(room =>
+                    MainWindowViewModel.RoomManager.rooms.ForEach(room =>
                     {
                         Application.Current.Dispatcher.BeginInvoke(new Action(() =>
                             {
@@ -114,7 +114,7 @@ namespace Ludavi_Client.ViewModels
                     MainWindowViewModel.VoiceUsers = new Util.ObservableCollectionEx<User>(JsonConvert.DeserializeObject<List<User>>(message[1]));
                     break;
                 case "RETURNROOMS":
-                    MainWindowViewModel.roomManager.UpdateRoomList(message[1]);
+                    MainWindowViewModel.RoomManager.UpdateRoomList(message[1]);
                     break;
             } 
         }
