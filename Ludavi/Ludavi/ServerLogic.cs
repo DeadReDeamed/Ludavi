@@ -158,7 +158,8 @@ namespace Server
             sendToAll<Task> send = null;
             foreach(KeyValuePair<Guid, ServerClient> key in clients)
             {
-                send += clients[key.Key].Handler.SendMessage;
+                if(clients[key.Key].Connected)
+                    send += clients[key.Key].Handler.SendMessage;
             }
             await send.Invoke(data);
         }
@@ -168,7 +169,8 @@ namespace Server
             sendToAllNoData send = null;
             foreach (KeyValuePair<Guid, ServerClient> key in clients)
             {
-                send += clients[key.Key].Handler.SendMessage;
+                if (clients[key.Key].Connected)
+                    send += clients[key.Key].Handler.SendMessage;
             }
             send.Invoke(Guid.Empty, room.RoomID.ToString(), TCPHandler.MessageTypes.ROOM, "RETURNUSERS " + JsonConvert.SerializeObject(((VoiceList)roomsAndMessages[room]).list));
         }
