@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Ludavi_Client.ViewModels;
+using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
@@ -15,6 +16,7 @@ namespace Ludavi_Client
     {
         protected override void OnStartup(StartupEventArgs args)
         {
-        }   
+        }
+
     }
 }

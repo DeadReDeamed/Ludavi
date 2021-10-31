@@ -68,7 +68,8 @@ namespace TCPHandlerNameSpace
             STATUS = 3,
             LOGIN = 4,
             ROOM = 5,
-            REGISTER = 6
+            REGISTER = 6,
+            LEAVE = 7
         }
 
         public enum StringIndex

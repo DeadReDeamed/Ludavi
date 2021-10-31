@@ -27,8 +27,9 @@ namespace Ludavi_Client.ViewModels
             this.MainWindowViewModel = mainWindowViewModel;
             udpHandler = new UDPHandler();
             functions = new Dictionary<TCPHandler.MessageTypes, Action<string[]>>();
-            functions.Add(TCPHandler.MessageTypes.CHAT, handleChatData);
-            functions.Add(TCPHandler.MessageTypes.ROOM, handleRoomData);
+            functions.Add(TCPHandler.MessageTypes.CHAT, HandleChatData);
+            functions.Add(TCPHandler.MessageTypes.ROOM, HandleRoomData);
+            functions.Add(TCPHandler.MessageTypes.LEAVE, HandleLeaving);
             functions.Add(TCPHandler.MessageTypes.VOICE, handleVoiceData);
             this.handler = tcphandler;
             Connected = true;
@@ -69,7 +70,13 @@ namespace Ludavi_Client.ViewModels
             udpHandler.SendUdpMessage(MainWindowViewModel.user.UserId, MainWindowViewModel.roomManager.currentRoom.RoomID, data);
         }
 
-        private void handleChatData(string[] data)
+        private void HandleLeaving(string[] data)
+        {
+            Connected = false;
+            MainWindowViewModel.client.GetStream().Close();   
+        }
+
+        private void HandleChatData(string[] data)
         {
             RoomManager roomManager = MainWindowViewModel.roomManager;
             string[] messageValues = data[(int)TCPHandler.StringIndex.MESSAGE].Split(':', 2);
@@ -80,7 +87,7 @@ namespace Ludavi_Client.ViewModels
             }
         }
 
-        private void handleRoomData(string[] data)
+        private void HandleRoomData(string[] data)
         {
             string[] message = data[(int)TCPHandler.StringIndex.MESSAGE].Split(" ", 2);
             switch (message[0])
