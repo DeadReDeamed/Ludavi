@@ -278,10 +278,10 @@ namespace Server
                 roomsAndUsers[currentRoom].Add(currentUser.UserId);
                 
                 SendUpdateVoiceToAllUsers(currentRoom);
-                int sendPort = new Random().Next(0, 1000);
-                while (portsInUse.Contains(sendPort)) sendPort = new Random().Next(0, 1000);
-                int receivePort = new Random().Next(0, 1000);
-                while (portsInUse.Contains(receivePort)) receivePort = new Random().Next(0, 1000);
+                int sendPort = new Random().Next(1, 1000);
+                while (portsInUse.Contains(sendPort)) sendPort = new Random().Next(1, 1000);
+                int receivePort = new Random().Next(1, 1000);
+                while (portsInUse.Contains(receivePort)) receivePort = new Random().Next(1, 1000);
                 clients[currentUser.UserId].StartVoiceChat(receivePort, sendPort, ((IPEndPoint)clients[currentUser.UserId].Client.Client.RemoteEndPoint).Address);
                 clients[currentUser.UserId].Handler.SendMessage(Guid.Parse(data[(int)TCPHandler.StringIndex.ID]), "", TCPHandler.MessageTypes.VOICE, "OK " 
                     + sendPort + " " + receivePort
