@@ -190,7 +190,7 @@ namespace Ludavi_Client.ViewModels
         public void ConnectToServer()
         {
             client = new TcpClient();
-            client.Connect("localhost", 80);
+            client.Connect("86.82.62.86", 80);
             tcpHandler = new TCPHandler(new MyNetworkStream(client.GetStream()));
         }
 

@@ -9,7 +9,8 @@ namespace TCPHandlerNamespace
 {
     public class UDPHandler
     {
-        private Socket udpSocket;
+        private Socket udpRecieverSocket;
+        private Socket udpSendingSocket;
         private UdpClient receivingClient;
         private UdpClient sendingClient;
         private IPEndPoint receivingEndPoint;
@@ -25,11 +26,15 @@ namespace TCPHandlerNamespace
 
         public void Connect(int sendingPort, int receivingPort, IPAddress Addres)
         {
-            sendingClient = new UdpClient(sendingPort);
+            sendingClient = new UdpClient(sendingPort, AddressFamily.InterNetwork);
             sendEndPoint = new IPEndPoint(Addres, sendingPort);
+            udpSendingSocket = new Socket(AddressFamily.InterNetworkV6, SocketType.Stream, ProtocolType.Udp);
+            udpSendingSocket.Bind(sendEndPoint);
 
-            receivingClient = new UdpClient(receivingPort);
+            receivingClient = new UdpClient(receivingPort, AddressFamily.InterNetwork);
             receivingEndPoint = new IPEndPoint(Addres, receivingPort);
+            udpRecieverSocket = new Socket(AddressFamily.InterNetworkV6, SocketType.Stream, ProtocolType.Udp);
+            udpRecieverSocket.Bind(receivingEndPoint);
             this.ReceivingPort = receivingPort;
             this.SendingPort = sendingPort;
         }
@@ -41,18 +46,24 @@ namespace TCPHandlerNamespace
             byte[] length = BitConverter.GetBytes(uid.Length);
             byte[] roomIdLength = BitConverter.GetBytes(roomid.Length);
             byte[] tempPacket = new byte[length.Length + uid.Length + roomIdLength.Length + roomid.Length + message.Length];
-            length.CopyTo(tempPacket, 0);
-            uid.CopyTo(tempPacket, length.Length);
-            roomIdLength.CopyTo(tempPacket, length.Length + uid.Length);
-            roomid.CopyTo(tempPacket, length.Length + uid.Length + roomIdLength.Length);
-            message.CopyTo(tempPacket, length.Length + uid.Length + roomIdLength.Length + roomid.Length);
-            sendingClient.Send(tempPacket, tempPacket.Length, sendEndPoint);
+            byte[] lengthFullPacket = BitConverter.GetBytes(tempPacket.Length);
+            byte[] fullPacket = new byte[4 + tempPacket.Length];
+            lengthFullPacket.CopyTo(fullPacket, 0);
+            length.CopyTo(fullPacket, lengthFullPacket.Length);
+            uid.CopyTo(fullPacket, length.Length + lengthFullPacket.Length);
+            roomIdLength.CopyTo(fullPacket, length.Length + uid.Length + lengthFullPacket.Length);
+            roomid.CopyTo(fullPacket, length.Length + uid.Length + roomIdLength.Length + lengthFullPacket.Length);
+            message.CopyTo(fullPacket, length.Length + uid.Length + roomIdLength.Length + roomid.Length + lengthFullPacket.Length);
+            udpSendingSocket.Send(tempPacket, SocketFlags.Broadcast);
+            
         }
 
         public Tuple<Guid, uint, byte[]> ReceiveUdpMessage()
         {
-            byte[] message;
-            message = receivingClient.Receive(ref receivingEndPoint);
+            byte[] message = new byte[4];
+            udpRecieverSocket.Receive(message, 0, message.Length, SocketFlags.Broadcast);
+            message = new byte[BitConverter.ToInt32(message)];
+            udpRecieverSocket.Receive(message, 0, message.Length, SocketFlags.Broadcast);
             int lengthGuid = BitConverter.ToInt32(message, 0);
             byte[] guidBytes = new byte[lengthGuid];
             int startIndex = 4;
