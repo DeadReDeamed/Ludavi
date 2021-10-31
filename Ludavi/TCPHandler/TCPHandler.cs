@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.Text;
 using System.Net.Sockets;
 using System.Threading.Tasks;
+using System.Net;
 
 namespace TCPHandlerNameSpace
 {
     public class TCPHandler
     {
         private NetworkStream stream;
-
         public TCPHandler(NetworkStream stream)
         {
             this.stream = stream;
@@ -48,6 +48,7 @@ namespace TCPHandlerNameSpace
         {
             byte[] buffer = new byte[4];
             await stream.ReadAsync(buffer, 0, buffer.Length);
+            
             int length = BitConverter.ToInt32(buffer);
             buffer = new byte[length];
             await stream.ReadAsync(buffer, 0, length);

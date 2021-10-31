@@ -14,17 +14,21 @@ namespace TCPHandlerNamespace
         private UdpClient receivingClient;
         private IPEndPoint receivingEndPoint;
         private IPEndPoint sendingEndPoint;
-    
+        private bool FirstTimeConnect;
+        private IPAddress receiverAddress;
+        public int SendingPort { get; set; }
         public UDPHandler()
         {
             sendingClient = new UdpClient();
             udpSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+            FirstTimeConnect = true;
         }
 
         public void Connect(string ip, int port)
         {
             sendingEndPoint = new IPEndPoint(IPAddress.Parse(ip), port);
             sendingClient.Connect(sendingEndPoint);
+            FirstTimeConnect = false;
         }
 
         public void SetReceivePoint(IPAddress ip, int receivingPort)
@@ -68,6 +72,11 @@ namespace TCPHandlerNamespace
             startIndex += roomIdBytes.Length;
             byte[] messageBytes = new byte[message.Length - startIndex - roomIdBytes.Length];
             Array.Copy(message, startIndex, messageBytes, 0, messageBytes.Length);
+            if (FirstTimeConnect)
+            {
+                receiverAddress = receivingEndPoint.Address;
+                Connect(receiverAddress, sendingport);
+            }
 
             return new Tuple<Guid ,uint, byte[]>(id, roomId, messageBytes);
         }
