@@ -184,7 +184,7 @@ namespace Ludavi_Client.ViewModels
 
         public async void SendMessageToRoom(string message)
         {
-            tcpHandler.SendMessage(user.UserId, roomManager.currentRoom.RoomID.ToString(), TCPHandler.MessageTypes.CHAT, user.Name + ":" + message);
+            tcpHandler.SendMessage(User.UserId, RoomManager.currentRoom.RoomID.ToString(), TCPHandler.MessageTypes.CHAT, User.Name + ":" + message);
         }
 
         public void ConnectToServer()
@@ -215,13 +215,13 @@ namespace Ludavi_Client.ViewModels
             if (!IsJoinedVoice)
             {
                 IsJoinedVoice = true;
-                tcpHandler.SendMessage(user.UserId, roomManager.currentRoom.RoomID.ToString(), TCPHandler.MessageTypes.VOICE, "JOIN");
+                tcpHandler.SendMessage(User.UserId, RoomManager.currentRoom.RoomID.ToString(), TCPHandler.MessageTypes.VOICE, "JOIN");
                 JoinButtonText = "Leave";
             }
             else
             {
                 IsJoinedVoice = false;
-                tcpHandler.SendMessage(user.UserId, roomManager.currentRoom.RoomID.ToString(), TCPHandler.MessageTypes.VOICE, "LEAVE");
+                tcpHandler.SendMessage(User.UserId, RoomManager.currentRoom.RoomID.ToString(), TCPHandler.MessageTypes.VOICE, "LEAVE");
                 JoinButtonText = "Join";
             }
         }
@@ -272,7 +272,7 @@ namespace Ludavi_Client.ViewModels
             roomDialog.ShowDialog();
             AddRoomViewModel roomDialogContext = (AddRoomViewModel)(roomDialog.DataContext);
             Room result = roomDialogContext.RoomResult;
-            tcpHandler.SendMessage(user.UserId, "", TCPHandler.MessageTypes.ROOM, "ADDROOM " + JsonConvert.SerializeObject(result));
+            tcpHandler.SendMessage(User.UserId, "", TCPHandler.MessageTypes.ROOM, "ADDROOM " + JsonConvert.SerializeObject(result));
             return result;
         }
 
@@ -300,7 +300,7 @@ namespace Ludavi_Client.ViewModels
 
         public async void Dispose()
         {
-            tcpHandler.SendMessage(user.UserId, "", TCPHandler.MessageTypes.LEAVE, "CLOSE ");
+            tcpHandler.SendMessage(User.UserId, "", TCPHandler.MessageTypes.LEAVE, "CLOSE ");
         }
 
         public void StartSendingVoiceData()

@@ -52,7 +52,7 @@ namespace TCPHandlerNamespace
         public Tuple<Guid, uint, byte[]> ReceiveUdpMessage()
         {
             byte[] message;
-            message = Client.Receive(ref receivingEndPoint);
+            message = client.Receive(ref receivingEndPoint);
             udpSocket.Receive(message);
             int lengthGuid = BitConverter.ToInt32(message, 0);
             byte[] guidBytes = new byte[lengthGuid];
