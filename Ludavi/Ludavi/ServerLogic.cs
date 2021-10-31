@@ -83,7 +83,7 @@ namespace Server
             tcpHandler = new TCPHandler(new MyNetworkStream(tcpClient.GetStream()));
             //Console.WriteLine($"Added: {tcpClient.Client.RemoteEndPoint} to server");
             string[] dataString = tcpHandler.ReadMessage();
-
+            
             int type = int.Parse(dataString[(int)TCPHandler.StringIndex.TYPE]);
             bool result = type switch
             {
@@ -106,6 +106,7 @@ namespace Server
             if (!clients.ContainsKey(id))
             {
                 ServerClient newClient = new ServerClient(new User(name, id), tcpClient, tcpHandler);
+                
                 clients.Add(id, newClient);
                 Console.WriteLine(clients[id].User.Name + " has joined Ludavi!");
                 clients[id].Handler.SendMessage(Guid.Empty, "", TCPHandler.MessageTypes.REGISTER, $"ok");
@@ -170,7 +171,7 @@ namespace Server
             {
                 send += clients[key.Key].Handler.SendMessage;
             }
-            send.Invoke(Guid.Empty, room.RoomID.ToString(), TCPHandler.MessageTypes.ROOM, "RETURNUSERS " + JsonConvert.SerializeObject(((VoiceList)roomsAndMessages[room]).list));
+            send.Invoke(Guid.Empty, room.RoomID.ToString(), TCPHandler.MessageTypes.ROOM, "RETURNUSERS " + JsonConvert.SerializeObject(((VoiceList)roomsAndMessages[room]).List));
         }
 
         public static void SendVoiceToAllUsers(Guid guid, uint roomID, byte[] message)
@@ -240,7 +241,7 @@ namespace Server
                     {
                         if(key.Key.RoomID == uint.Parse(messageSplit[1]))
                         {
-                            clients[Guid.Parse(data[(int)TCPHandler.StringIndex.ID])].Handler.SendMessage(Guid.Parse(data[(int)TCPHandler.StringIndex.ID]), "", TCPHandler.MessageTypes.ROOM, "RETURNUSERS " + JsonConvert.SerializeObject(((VoiceList)key.Value).list));
+                            clients[Guid.Parse(data[(int)TCPHandler.StringIndex.ID])].Handler.SendMessage(Guid.Parse(data[(int)TCPHandler.StringIndex.ID]), "", TCPHandler.MessageTypes.ROOM, "RETURNUSERS " + JsonConvert.SerializeObject(((VoiceList)key.Value).List));
                             break;
 
                         }
@@ -277,17 +278,20 @@ namespace Server
                 roomsAndUsers[currentRoom].Add(currentUser.UserId);
                 
                 SendUpdateVoiceToAllUsers(currentRoom);
-                //int sendPort = new Random().Next(0, 1000);
-                //while (portsInUse.Contains(sendPort)) sendPort = new Random().Next(0, 1000);
-                //int receivePort = new Random().Next(0, 1000);
-                //while (portsInUse.Contains(receivePort)) receivePort = new Random().Next(0, 1000);
-                //clients[currentUser.UserId].startVoiceChat(receivePort);
-                //clients[currentUser.UserId].UdpHandler.Connect(sendPort);
+                int sendPort = new Random().Next(0, 1000);
+                while (portsInUse.Contains(sendPort)) sendPort = new Random().Next(0, 1000);
+                int receivePort = new Random().Next(0, 1000);
+                while (portsInUse.Contains(receivePort)) receivePort = new Random().Next(0, 1000);
+                clients[currentUser.UserId].StartVoiceChat(receivePort, sendPort, ((IPEndPoint)clients[currentUser.UserId].Client.Client.RemoteEndPoint).Address);
                 clients[currentUser.UserId].Handler.SendMessage(Guid.Parse(data[(int)TCPHandler.StringIndex.ID]), "", TCPHandler.MessageTypes.VOICE, "OK " 
-                    //+ sendPort + " " + receivePort
+                    + sendPort + " " + receivePort
                     );
             } else if(message == "LEAVE" && currentRoom != null && currentUser != null)
             {
+                clients[currentUser.UserId].IsInVoice = false;
+                clients[currentUser.UserId].UdpHandler.close();
+                portsInUse.Remove(clients[currentUser.UserId].UdpHandler.SendingPort);
+                portsInUse.Remove(clients[currentUser.UserId].UdpHandler.ReceivingPort);
 
                 ((VoiceList)roomsAndMessages[currentRoom]).List.Remove(currentUser);
                 roomsAndUsers[currentRoom].Remove(currentUser.UserId);

@@ -9,31 +9,31 @@ namespace TCPHandlerNamespace
 {
     public class UDPHandler
     {
-        private UdpClient client;
         private Socket udpSocket;
         private UdpClient receivingClient;
+        private UdpClient sendingClient;
         private IPEndPoint receivingEndPoint;
-        private bool firstTimeConnect;
-
+        private IPEndPoint sendEndPoint;
+        public int ReceivingPort { get; set; }
         public IPEndPoint SendingEndPoint { get; set; }
         public IPAddress ReceiverAddress { get; set; }
         public int SendingPort { get; set; }
         public UDPHandler()
         {
-            udpSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-            firstTimeConnect = true;
+
         }
 
-        public void Connect(int port)
+        public void Connect(int sendingPort, int receivingPort, IPAddress Addres)
         {
-            client = new UdpClient(port);
-            SendingPort = port;
+            sendingClient = new UdpClient(sendingPort);
+            sendEndPoint = new IPEndPoint(Addres, sendingPort);
+
+            receivingClient = new UdpClient(receivingPort);
+            receivingEndPoint = new IPEndPoint(Addres, receivingPort);
+            this.ReceivingPort = receivingPort;
+            this.SendingPort = sendingPort;
         }
 
-        public void SetReceivePoint(IPAddress ip, int receivingPort)
-        {
-            receivingEndPoint = new IPEndPoint(ip, receivingPort);
-        }
         public async void SendUdpMessage(Guid id, uint RoomID, byte[] message)
         {
             byte[] uid = Encoding.ASCII.GetBytes(id.ToString());
@@ -46,13 +46,13 @@ namespace TCPHandlerNamespace
             roomIdLength.CopyTo(tempPacket, length.Length + uid.Length);
             roomid.CopyTo(tempPacket, length.Length + uid.Length + roomIdLength.Length);
             message.CopyTo(tempPacket, length.Length + uid.Length + roomIdLength.Length + roomid.Length);
-            client.Send(tempPacket, tempPacket.Length, ReceiverAddress.ToString(), SendingPort);
+            sendingClient.Send(tempPacket, tempPacket.Length, sendEndPoint);
         }
 
         public Tuple<Guid, uint, byte[]> ReceiveUdpMessage()
         {
             byte[] message;
-            message = Client.Receive(ref receivingEndPoint);
+            message = receivingClient.Receive(ref receivingEndPoint);
             udpSocket.Receive(message);
             int lengthGuid = BitConverter.ToInt32(message, 0);
             byte[] guidBytes = new byte[lengthGuid];
@@ -69,13 +69,14 @@ namespace TCPHandlerNamespace
             startIndex += roomIdBytes.Length;
             byte[] messageBytes = new byte[message.Length - startIndex - roomIdBytes.Length];
             Array.Copy(message, startIndex, messageBytes, 0, messageBytes.Length);
-            if (firstTimeConnect)
-            {
-                ReceiverAddress = receivingEndPoint.Address;
-                firstTimeConnect = false;
-            }
-
+            
             return new Tuple<Guid ,uint, byte[]>(id, roomId, messageBytes);
+        }
+
+        public void close()
+        {
+            sendingClient.Close();
+            receivingClient.Close();
         }
     }
 }

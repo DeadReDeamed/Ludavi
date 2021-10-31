@@ -21,7 +21,7 @@ namespace Ludavi_Client.ViewModels
         private TCPHandler handler;
         public bool Connected { get; set; }
         public MainWindowViewModel MainWindowViewModel;
-        private UDPHandler udpHandler;
+        public UDPHandler udpHandler { get; set; }
         public NetworkManager(TCPHandlerNameSpace.TCPHandler tcphandler, MainWindowViewModel mainWindowViewModel)
         {
             this.MainWindowViewModel = mainWindowViewModel;
@@ -49,12 +49,9 @@ namespace Ludavi_Client.ViewModels
             string[] message = data[(int)TCPHandler.StringIndex.MESSAGE].Split(" ", 3);
             if(message[0] == "OK")
             {
-                //udpHandler.Connect(int.Parse(message[2]));
-                //udpHandler.SetReceivePoint(IPAddress.Any, int.Parse(message[1]));
-                //udpHandler.sendingEndPoint = new IPEndPoint(IPAddress.Parse("localhost"), int.Parse(message[2]));
-                //udpHandler.receiverAddress = IPAddress.Parse("localhost");
-                //startListeningForVoice();
-                //MainWindowViewModel.StartSendingVoiceData();
+                udpHandler.Connect(int.Parse(message[2]), int.Parse(message[1]), ((IPEndPoint)MainWindowViewModel.client.Client.RemoteEndPoint).Address);
+                MainWindowViewModel.StartSendingVoiceData();
+                StartListeningForVoice();
             }
         }
 
@@ -62,8 +59,11 @@ namespace Ludavi_Client.ViewModels
         {
             new Thread(async () =>
             {
-                Tuple<Guid, uint, byte[]> message = udpHandler.ReceiveUdpMessage();
-                MainWindowViewModel.PlayVoiceData(message.Item3);
+                while (MainWindowViewModel.IsJoinedVoice)
+                {
+                    Tuple<Guid, uint, byte[]> message = udpHandler.ReceiveUdpMessage();
+                    MainWindowViewModel.PlayVoiceData(message.Item3);
+                }
             }).Start();
         }
 

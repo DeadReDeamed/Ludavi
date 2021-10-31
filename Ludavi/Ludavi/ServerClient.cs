@@ -68,9 +68,9 @@ namespace Server
             }
         }
 
-        public void StartVoiceChat(int receivePort)
+        public void StartVoiceChat(int receivePort, int sendingPort, IPAddress iP)
         {
-            UdpHandler.SetReceivePoint(IPAddress.Any, receivePort);
+            UdpHandler.Connect(sendingPort, receivePort, iP);
             IsInVoice = true;
             new Thread(async () => {
                 while (IsInVoice)
