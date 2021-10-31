@@ -18,11 +18,6 @@
     <PackageReference Include="coverlet.collector" Version="3.0.2" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Ludavi Client\Ludavi Client.csproj" />
-    <ProjectReference Include="..\Ludavi\Ludavi Server.csproj" />
-  </ItemGroup>
-
   <Import Project="..\TCPHandler\TCPHandler.projitems" Label="Shared" />
 
 </Project>
