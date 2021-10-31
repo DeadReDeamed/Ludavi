@@ -49,7 +49,7 @@ namespace Ludavi_Client.ViewModels
             string[] message = data[(int)TCPHandler.StringIndex.MESSAGE].Split(" ", 3);
             if(message[0] == "OK")
             {
-                udpHandler.Connect("127.0.0.1", int.Parse(message[1]));
+                udpHandler.Connect("", int.Parse(message[1]));
                 udpHandler.SetReceivePoint(IPAddress.Any, int.Parse(message[2]));
                 startListeningForVoice();
                 MainWindowViewModel.StartSendingVoiceData();
@@ -60,7 +60,7 @@ namespace Ludavi_Client.ViewModels
         {
             new Thread(async () =>
             {
-                Tuple<Guid, uint, byte[]> message = await udpHandler.ReceiveUdpMessage();
+                Tuple<Guid, uint, byte[]> message = udpHandler.ReceiveUdpMessage();
                 MainWindowViewModel.PlayVoiceData(message.Item3);
             }).Start();
         }

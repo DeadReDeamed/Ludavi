@@ -9,7 +9,7 @@ namespace TCPHandlerNamespace
 {
     public class UDPHandler
     {
-        private UdpClient sendingClient;
+        private UdpClient Client;
         private Socket udpSocket;
         private UdpClient receivingClient;
         private IPEndPoint receivingEndPoint;
@@ -19,22 +19,19 @@ namespace TCPHandlerNamespace
         public int SendingPort { get; set; }
         public UDPHandler()
         {
-            sendingClient = new UdpClient();
             udpSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
             FirstTimeConnect = true;
         }
 
         public void Connect(string ip, int port)
         {
-            sendingEndPoint = new IPEndPoint(IPAddress.Parse(ip), port);
-            sendingClient.Connect(sendingEndPoint);
+            Client = new UdpClient(port);
             FirstTimeConnect = false;
         }
 
         public void SetReceivePoint(IPAddress ip, int receivingPort)
         {
             receivingEndPoint = new IPEndPoint(ip, receivingPort);
-            receivingClient = new UdpClient(receivingEndPoint);
         }
         public async void SendUdpMessage(Guid id, uint RoomID, byte[] message)
         {
@@ -48,14 +45,13 @@ namespace TCPHandlerNamespace
             roomIdLength.CopyTo(tempPacket, length.Length + uid.Length);
             roomid.CopyTo(tempPacket, length.Length + uid.Length + roomIdLength.Length);
             message.CopyTo(tempPacket, length.Length + uid.Length + roomIdLength.Length + roomid.Length);
-            sendingClient.Send(tempPacket, tempPacket.Length);
+            Client.Send(tempPacket, tempPacket.Length, sendingEndPoint.ToString(), SendingPort);
         }
 
-        public async Task<Tuple<Guid, uint, byte[]>> ReceiveUdpMessage()
+        public Tuple<Guid, uint, byte[]> ReceiveUdpMessage()
         {
             byte[] message;
-            var result = await receivingClient.ReceiveAsync();
-            message = result.Buffer;
+            message = Client.Receive(ref receivingEndPoint);
             
             int lengthGuid = BitConverter.ToInt32(message, 0);
             byte[] guidBytes = new byte[lengthGuid];
@@ -75,7 +71,7 @@ namespace TCPHandlerNamespace
             if (FirstTimeConnect)
             {
                 receiverAddress = receivingEndPoint.Address;
-                Connect(receiverAddress, sendingport);
+                Connect(receiverAddress.ToString(), SendingPort);
             }
 
             return new Tuple<Guid ,uint, byte[]>(id, roomId, messageBytes);

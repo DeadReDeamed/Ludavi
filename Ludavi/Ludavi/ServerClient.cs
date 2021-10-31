@@ -55,7 +55,7 @@ namespace Server
             new Thread(async () => {
                 while (IsInVoice)
                 {
-                    Tuple<Guid, uint, byte[]> message = await UdpHandler.ReceiveUdpMessage();
+                    Tuple<Guid, uint, byte[]> message = UdpHandler.ReceiveUdpMessage();
                     ServerLogic.SendVoiceToAllUsers(message.Item1, message.Item2, message.Item3);
                 }
             }).Start();
