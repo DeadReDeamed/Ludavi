@@ -25,10 +25,10 @@ namespace TCPHandlerNamespace
 
         public void Connect(int sendingPort, int receivingPort, IPAddress Addres)
         {
-            sendingClient = new UdpClient(sendingPort);
+            sendingClient = new UdpClient(sendingPort, AddressFamily.InterNetworkV6);
             sendEndPoint = new IPEndPoint(Addres, sendingPort);
 
-            receivingClient = new UdpClient(receivingPort);
+            receivingClient = new UdpClient(receivingPort, AddressFamily.InterNetworkV6);
             receivingEndPoint = new IPEndPoint(Addres, receivingPort);
             this.ReceivingPort = receivingPort;
             this.SendingPort = sendingPort;
