@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
@@ -27,6 +27,7 @@ namespace TCPHandlerNamespace
         public void Connect(int sendingPort, int receivingPort, IPAddress Addres)
         {
             sendingClient = new UdpClient(sendingPort, AddressFamily.InterNetwork);
+
             sendEndPoint = new IPEndPoint(Addres, sendingPort);
             udpSendingSocket = new Socket(AddressFamily.InterNetworkV6, SocketType.Stream, ProtocolType.Udp);
             udpSendingSocket.Bind(sendEndPoint);
