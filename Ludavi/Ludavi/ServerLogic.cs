@@ -159,7 +159,11 @@ namespace Server
             sendToAll<Task> send = null;
             foreach(KeyValuePair<Guid, ServerClient> key in clients)
             {
-                send += clients[key.Key].Handler.SendMessage;
+                if (clients[key.Key].Connected)
+                {
+                    send += clients[key.Key].Handler.SendMessage;
+                }
+                
             }
             if (send != null)
             {
@@ -172,7 +176,10 @@ namespace Server
             sendToAllNoData send = null;
             foreach (KeyValuePair<Guid, ServerClient> key in clients)
             {
-                send += clients[key.Key].Handler.SendMessage;
+                if (clients[key.Key].Connected)
+                {
+                    send += clients[key.Key].Handler.SendMessage;
+                }
             }
             if (send != null)
             {
