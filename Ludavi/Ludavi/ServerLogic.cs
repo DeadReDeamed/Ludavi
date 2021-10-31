@@ -275,13 +275,15 @@ namespace Server
                 roomsAndUsers[currentRoom].Add(currentUser.UserId);
                 
                 SendUpdateVoiceToAllUsers(currentRoom);
-                int sendPort = new Random().Next(0, 1000);
-                while (portsInUse.Contains(sendPort)) sendPort = new Random().Next(0, 1000);
-                int receivePort = new Random().Next(0, 1000);
-                while (portsInUse.Contains(receivePort)) receivePort = new Random().Next(0, 1000);
-                clients[currentUser.UserId].startVoiceChat(receivePort);
-                clients[currentUser.UserId].UdpHandler.Connect(sendPort);
-                await clients[currentUser.UserId].Handler.SendMessage(Guid.Parse(data[(int)TCPHandler.StringIndex.ID]), "", TCPHandler.MessageTypes.VOICE, "OK " + sendPort + " " + receivePort);
+                //int sendPort = new Random().Next(0, 1000);
+                //while (portsInUse.Contains(sendPort)) sendPort = new Random().Next(0, 1000);
+                //int receivePort = new Random().Next(0, 1000);
+                //while (portsInUse.Contains(receivePort)) receivePort = new Random().Next(0, 1000);
+                //clients[currentUser.UserId].startVoiceChat(receivePort);
+                //clients[currentUser.UserId].UdpHandler.Connect(sendPort);
+                await clients[currentUser.UserId].Handler.SendMessage(Guid.Parse(data[(int)TCPHandler.StringIndex.ID]), "", TCPHandler.MessageTypes.VOICE, "OK " 
+                    //+ sendPort + " " + receivePort
+                    );
             } else if(message == "LEAVE" && currentRoom != null && currentUser != null)
             {
 

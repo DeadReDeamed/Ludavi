@@ -15,7 +15,7 @@ namespace TCPHandlerNamespace
         private IPEndPoint receivingEndPoint;
         public IPEndPoint sendingEndPoint { get; set; }
         private bool FirstTimeConnect;
-        private IPAddress receiverAddress;
+        public IPAddress receiverAddress { get; set; }
         public int SendingPort { get; set; }
         public UDPHandler()
         {
