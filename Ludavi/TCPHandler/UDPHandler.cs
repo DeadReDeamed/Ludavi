@@ -13,7 +13,7 @@ namespace TCPHandlerNamespace
         private Socket udpSocket;
         private UdpClient receivingClient;
         private IPEndPoint receivingEndPoint;
-        private IPEndPoint sendingEndPoint;
+        public IPEndPoint sendingEndPoint { get; set; }
         private bool FirstTimeConnect;
         private IPAddress receiverAddress;
         public int SendingPort { get; set; }
@@ -23,10 +23,10 @@ namespace TCPHandlerNamespace
             FirstTimeConnect = true;
         }
 
-        public void Connect(string ip, int port)
+        public void Connect(int port)
         {
             Client = new UdpClient(port);
-            FirstTimeConnect = false;
+            SendingPort = port;
         }
 
         public void SetReceivePoint(IPAddress ip, int receivingPort)
@@ -45,7 +45,7 @@ namespace TCPHandlerNamespace
             roomIdLength.CopyTo(tempPacket, length.Length + uid.Length);
             roomid.CopyTo(tempPacket, length.Length + uid.Length + roomIdLength.Length);
             message.CopyTo(tempPacket, length.Length + uid.Length + roomIdLength.Length + roomid.Length);
-            Client.Send(tempPacket, tempPacket.Length, sendingEndPoint.ToString(), SendingPort);
+            Client.Send(tempPacket, tempPacket.Length, receiverAddress.ToString(), SendingPort);
         }
 
         public Tuple<Guid, uint, byte[]> ReceiveUdpMessage()
@@ -71,7 +71,7 @@ namespace TCPHandlerNamespace
             if (FirstTimeConnect)
             {
                 receiverAddress = receivingEndPoint.Address;
-                Connect(receiverAddress.ToString(), SendingPort);
+                FirstTimeConnect = false;
             }
 
             return new Tuple<Guid ,uint, byte[]>(id, roomId, messageBytes);

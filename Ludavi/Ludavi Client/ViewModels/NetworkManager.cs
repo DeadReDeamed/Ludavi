@@ -49,8 +49,9 @@ namespace Ludavi_Client.ViewModels
             string[] message = data[(int)TCPHandler.StringIndex.MESSAGE].Split(" ", 3);
             if(message[0] == "OK")
             {
-                udpHandler.Connect("", int.Parse(message[1]));
-                udpHandler.SetReceivePoint(IPAddress.Any, int.Parse(message[2]));
+                udpHandler.Connect(int.Parse(message[2]));
+                udpHandler.SetReceivePoint(IPAddress.Any, int.Parse(message[1]));
+                udpHandler.sendingEndPoint = new IPEndPoint(IPAddress.Parse("86.82.62.86"), int.Parse(message[2]));
                 startListeningForVoice();
                 MainWindowViewModel.StartSendingVoiceData();
             }
