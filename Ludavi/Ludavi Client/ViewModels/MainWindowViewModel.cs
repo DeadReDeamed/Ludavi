@@ -123,7 +123,7 @@ namespace Ludavi_Client.ViewModels
         private static TCPHandler tcpHandler;
         public static User user { get; private set; }
         public RoomManager roomManager { get; set; }
-        private TcpClient client;
+        public TcpClient client;
         private NetworkManager network;
         public Visibility Chat { get { return _chat; } set { _chat = value; OnPropertyChanged("Chat"); } }
         private Visibility _chat;
@@ -161,7 +161,6 @@ namespace Ludavi_Client.ViewModels
                 Messages = new ObservableCollectionEx<Message>();
             }
             
-
             SelectedItemChangedCommand = new RelayCommand((selectedItem) =>
             {
                 if(selectedItem != null)
@@ -176,7 +175,6 @@ namespace Ludavi_Client.ViewModels
                         SendMessageToRoom(TextBoxText);
                         TextBoxText = "";
                     }
-                    
             });
         }
 
@@ -190,7 +188,6 @@ namespace Ludavi_Client.ViewModels
             client = new TcpClient();
             client.Connect("localhost", 80);
             tcpHandler = new TCPHandler(client.GetStream());
-            //Console.WriteLine("dawdad");
         }
 
         private User OpenLoginDialog()
@@ -265,20 +262,20 @@ namespace Ludavi_Client.ViewModels
             set { this.openRoomDialogCommand = value; }
         }
 
-        public static Room OpenRoomDialog()
+        public async static Task<Room> OpenRoomDialog()
         {
             AddRoomWindow roomDialog = new AddRoomWindow();
             roomDialog.ShowDialog();
             AddRoomViewModel roomDialogContext = (AddRoomViewModel)(roomDialog.DataContext);
             Room result = roomDialogContext.RoomResult;
-            tcpHandler.SendMessage(user.UserId, "", TCPHandler.MessageTypes.ROOM, "ADDROOM " + JsonConvert.SerializeObject(result));
+            await tcpHandler.SendMessage(user.UserId, "", TCPHandler.MessageTypes.ROOM, "ADDROOM " + JsonConvert.SerializeObject(result));
             return result;
         }
 
-        private void OnOpenRoomDialog(object parameter)
+        private async void OnOpenRoomDialog(object parameter)
         {
 
-            Room room = OpenRoomDialog();
+            Room room = await OpenRoomDialog();
 
             if (room == null) return;
             
@@ -297,10 +294,9 @@ namespace Ludavi_Client.ViewModels
             this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(property));
         }
 
-        public void Dispose()
+        public async void Dispose()
         {
-            this.network.Connected = false;
-            this.client.GetStream().Close();
+            await tcpHandler.SendMessage(user.UserId, "", TCPHandler.MessageTypes.LEAVE, "CLOSE ");
         }
     }
 }

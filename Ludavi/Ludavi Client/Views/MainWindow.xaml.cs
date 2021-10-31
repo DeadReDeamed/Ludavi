@@ -32,5 +32,13 @@ namespace Ludavi_Client
             InitializeComponent();
         }
 
+        private void mainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            if(this.DataContext is MainWindowViewModel)
+            {
+                MainWindowViewModel dc = (MainWindowViewModel)this.DataContext;
+                dc.Dispose();
+            }
+        }
     }
 }

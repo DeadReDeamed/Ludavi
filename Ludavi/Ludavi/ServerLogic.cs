@@ -38,6 +38,7 @@ namespace Server
             functions.Add(TCPHandler.MessageTypes.CHAT, SendChatToAllUsers);
             functions.Add(TCPHandler.MessageTypes.ROOM, HandleRoomManagement);
             functions.Add(TCPHandler.MessageTypes.VOICE, HandleVoiceData);
+            functions.Add(TCPHandler.MessageTypes.LEAVE, HandleLeaveRequest);
             usersInServer = new List<User>();
             tcpListener = new TcpListener(System.Net.IPAddress.Any, 80);
             tcpListener.Start();
@@ -47,6 +48,22 @@ namespace Server
             roomsAndMessages.Add(general, new MessageList(new List<Message>()));
             tcpListener.BeginAcceptTcpClient(new AsyncCallback(connectClientsToServer), null);
 
+        }
+
+        private async static void HandleLeaveRequest(string[] data)
+        {
+            Guid id = Guid.Parse(data[(int)TCPHandler.StringIndex.ID]);
+            foreach (KeyValuePair<Guid, ServerClient> c in clients)
+            {
+                if (c.Key.Equals(id))
+                {
+                    await clients[id].Handler.SendMessage(Guid.Empty, "", TCPHandler.MessageTypes.LEAVE, $"ok");
+                    c.Value.Client.GetStream().Close();
+                    //c.Value.Client.Close();
+                    c.Value.Connected = false;
+                    usersInServer.Remove(c.Value.User);
+                }
+            }
         }
 
         public static async void connectClientsToServer(IAsyncResult ar)
@@ -60,7 +77,7 @@ namespace Server
             bool result = type switch
             {
                 (int)TCPHandler.MessageTypes.REGISTER => await HandleRegisterRequest(dataString, tcpClient),
-                (int)TCPHandler.MessageTypes.LOGIN => await HandleLoginRequest(dataString),
+                (int)TCPHandler.MessageTypes.LOGIN => await HandleLoginRequest(dataString, tcpHandler, tcpClient),
                 _ => throw new Exception("Login request was not recognized")
             };
 
@@ -87,12 +104,12 @@ namespace Server
             else
             {
                 Console.WriteLine(clients[id].User.Name + " has tried to register a taken login, what a dummy :)");
-                await clients[id].Handler.SendMessage(Guid.Empty, "", TCPHandler.MessageTypes.REGISTER, $"already registered!");
+                await tcpHandler.SendMessage(Guid.Empty, "", TCPHandler.MessageTypes.REGISTER, $"already registered!");
                 return false;
             }
         }
 
-        public static async Task<bool> HandleLoginRequest(string[] dataString)
+        public static async Task<bool> HandleLoginRequest(string[] dataString, TCPHandler handler, TcpClient client)
         {
             string[] userValues = dataString[((int)TCPHandler.StringIndex.MESSAGE)].Split(' ', 2);
             Guid id = Guid.Parse(userValues[0]);
@@ -100,7 +117,9 @@ namespace Server
             if (clients.ContainsKey(id) && !clients[id].Connected)
             {
                 Console.WriteLine(clients[id].User.Name + " has logged in!");
+                clients[id] = new ServerClient(clients[id].User, client, handler);
                 await clients[id].Handler.SendMessage(Guid.Empty, "", TCPHandler.MessageTypes.LOGIN, $"ok");
+                usersInServer.Add(new User(name, id));
                 return true;
             }
             else {
