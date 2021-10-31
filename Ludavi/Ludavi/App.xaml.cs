@@ -14,14 +14,23 @@ namespace Ludavi
     /// </summary>
     public partial class App : Application
     {
+        ServerLogic server;
+
         protected override void OnStartup(StartupEventArgs e)
         {
             // On start stuff here
             base.OnStartup(e);
 
-            ServerLogic.RunServer();
+            server = new ServerLogic();
+            server.RunServer();
 
+            
             // Or here, where you find it more appropriate
+        }
+
+        private void Application_Exit(object sender, ExitEventArgs e)
+        {
+            server.Dispose();
         }
     }
 }

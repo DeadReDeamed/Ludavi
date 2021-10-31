@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Ludavi;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -32,13 +33,13 @@ namespace Server
         //}
 
         private delegate void Tasks(string[] data);
-        public static void RunServer()
+
+        public void RunServer()
         {
             roomsAndMessages = new Dictionary<Room, ServerList>();
-            clients = new Dictionary<Guid, ServerClient>();
+            clients = InitClients();
             roomsAndUsers = new Dictionary<Room, List<Guid>>();
             portsInUse = new List<int>();
-
             functions = new Dictionary<TCPHandler.MessageTypes, Action<string[]>>();
 
             functions.Add(TCPHandler.MessageTypes.CHAT, SendChatToAllUsers);
@@ -55,6 +56,15 @@ namespace Server
             roomsAndMessages.Add(general, new MessageList(new List<Message>()));
             tcpListener.BeginAcceptTcpClient(new AsyncCallback(connectClientsToServer), null);
 
+        }
+
+        private Dictionary<Guid, ServerClient> InitClients()
+        {
+            Dictionary<Guid, ServerClient> clients = new Dictionary<Guid, ServerClient>();
+
+            FileIO.tryGetUsersFromSaveFile(ref clients);
+
+            return clients;
         }
 
         private async static void HandleLeaveRequest(string[] data)
@@ -299,8 +309,10 @@ namespace Server
             foreach(KeyValuePair<Guid, ServerClient> c in clients)
             {
                 c.Value.Connected = false;
-                c.Value.Client.GetStream().Close();
+                c.Value.IsInVoice = false;
             }
+
+            FileIO.writeUsersToSaveFile(clients);
         }
     }
 

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using TCPHandlerNamespace;
@@ -12,15 +13,30 @@ using TCPHandlerNameSpace.Models;
 
 namespace Server
 {
+    [Serializable]
     public class ServerClient
     {
+        [JsonInclude]
         public User User { get; set; }
+
+        [JsonInclude]
         public uint currentRoomid { get; set; }
+
+        [JsonIgnore]
         public TCPHandler Handler { get; set; }
+
+        [JsonIgnore]
         public TcpClient Client { get; set; }
+
+        [JsonIgnore]
         public UDPHandler UdpHandler { get; set; }
+
+        [JsonInclude]
         public bool Connected { get; set; }
+
+        [JsonInclude]
         public bool IsInVoice;
+
         public ServerClient(User user, TcpClient client, TCPHandler handler)
         {
             this.User = user;
@@ -29,6 +45,13 @@ namespace Server
             Connected = true;
             new Thread(async () => { startListening(); }).Start();
             UdpHandler = new UDPHandler();
+        }
+
+        public ServerClient(User user)
+        {
+            this.User = user;
+            this.Handler = null;
+            this.Client = null;
         }
 
         public async void startListening()
